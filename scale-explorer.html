@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Harmonic Scale Explorer - Extended String Instruments</title>
+  <title>Harmonic Scale Explorer - Extended String Instruments with Flat Support</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -82,7 +82,8 @@
     <form id="scaleForm">
       <div class="form-group">
         <label for="tonic">Tonic Chord</label>
-        <input type="text" id="tonic" placeholder="e.g., C" required>
+        <!-- User may enter flats such as "Bb" -->
+        <input type="text" id="tonic" placeholder="e.g., C or Bb" required>
       </div>
       <div class="form-group">
         <label for="scaleType">Scale Type</label>
@@ -95,6 +96,7 @@
       <div class="form-group">
         <label for="instrument">Instrument</label>
         <select id="instrument" required>
+          <!-- List of string instruments only -->
           <option value="6guitar">6‑String Guitar</option>
           <option value="7guitar">7‑String Guitar</option>
           <option value="4bass">4‑String Bass</option>
@@ -208,7 +210,7 @@
         presetSelect.appendChild(option);
       }
       tuningGroup.appendChild(presetSelect);
-      // Create custom tuning text box.
+      // Create custom tuning textbox.
       let customLabel = document.createElement("label");
       customLabel.setAttribute("for", "customTuning");
       customLabel.textContent = "Custom Tuning (optional):";
@@ -222,7 +224,7 @@
     }
 
     // ---------------------------
-    // Core Functions: Scale, Chord, and Pitch Calculations
+    // Parse Tuning String
     // ---------------------------
     function parseGuitarTuning(tuningStr) {
       let parts = tuningStr.split(",");
@@ -237,6 +239,19 @@
       return tuning;
     }
 
+    // ---------------------------
+    // Flat Handling: For computation we need a normalized tonic.
+    // If the tonic is flat (e.g., "Bb"), we convert it to its sharp equivalent ("A#").
+    // However, displayTonic remains as entered.
+    // ---------------------------
+    function convertFlatToSharp(note) {
+      const flatToSharp = { "Bb": "A#", "Db": "C#", "Eb": "D#", "Gb": "F#", "Ab": "G#" };
+      return flatToSharp[note] || note;
+    }
+
+    // ---------------------------
+    // Core Functions: Scale, Chord, and Pitch Calculations
+    // ---------------------------
     function computeScale(tonic, scaleType) {
       let intervals;
       if (scaleType === "major") {
@@ -267,14 +282,24 @@
       return intervals.map(interval => notes[(rootIndex + interval) % 12]);
     }
 
-    function getChordSymbol(root, quality) {
+    // getChordSymbol now uses the computed chord root for that scale degree.
+    // If useFlat is true, we convert known sharps to flats.
+    function getChordSymbol(root, quality, useFlat) {
+      let symbol;
       switch (quality) {
-        case "major": return root;
-        case "minor": return root + "m";
-        case "diminished": return root + "°";
-        case "augmented": return root + "+";
-        default: return root;
+        case "major": symbol = root; break;
+        case "minor": symbol = root + "m"; break;
+        case "diminished": symbol = root + "°"; break;
+        case "augmented": symbol = root + "+"; break;
+        default: symbol = root;
       }
+      if (useFlat) {
+        const sharpToFlat = { "A#": "Bb", "C#": "Db", "D#": "Eb", "F#": "Gb", "G#": "Ab" };
+        if (sharpToFlat[symbol]) {
+          symbol = sharpToFlat[symbol];
+        }
+      }
+      return symbol;
     }
 
     function getProducedPitch(tuningObj, fret) {
@@ -294,7 +319,7 @@
     }
 
     // ---------------------------
-    // DFS Candidate Generation
+    // Recursive DFS Candidate Generator
     // ---------------------------
     function dfsCandidatesForSpan(chordNotes, tuning, minFret, maxFret, index, fundamentalFound, currentAssignment, results) {
       if (index === tuning.length) {
@@ -438,11 +463,11 @@
           let fretPosition = fret - displayStartFret;
           let x = marginLeft + i * stringSpacing + stringSpacing / 2;
           let y = marginTop + (fretPosition + 0.5) * fretSpacing;
-          svg += `<circle cx="${x}" cy="${y}" r="${stringSpacing / 4}" fill="black" />`;
+          svg += `<circle cx="${x}" cy="${y}" r="${stringSpacing/4}" fill="black" />`;
         }
       }
       if (displayStartFret > 1) {
-        svg += `<text x="5" y="${marginTop + fretSpacing / 2}" font-size="12" fill="black">${displayStartFret}</text>`;
+        svg += `<text x="5" y="${marginTop + fretSpacing/2}" font-size="12" fill="black">${displayStartFret}</text>`;
       }
       svg += `</svg>`;
       return svg;
@@ -451,15 +476,19 @@
     // ---------------------------
     // Main Function: generateChords
     // ---------------------------
-    function generateChords(tonic, scaleType, instrument, customTuning) {
+    function generateChords(tonic, scaleType, instrument, customTuning, displayTonic) {
       let scale = computeScale(tonic, scaleType);
       let qualities = chordQualities[scaleType];
+      // Determine if the user entered a flat tonic for display purposes.
+      let useFlat = displayTonic.includes("b");
       let results = [];
       for (let i = 0; i < scale.length; i++) {
         let chordRoot = scale[i];
         let quality = qualities[i];
         let chordNotes = computeChordNotes(chordRoot, quality);
-        let chordSymbol = getChordSymbol(chordRoot, quality);
+        // Use chordRoot (computed from normalized tonic) to compute chord symbol,
+        // and convert to flat notation if useFlat is true.
+        let chordSymbol = getChordSymbol(chordRoot, quality, useFlat);
         let fingerings = computeGuitarFingerings(chordNotes, customTuning);
         results.push({
           degree: romanMapping[scaleType][i],
@@ -478,7 +507,11 @@
     document.getElementById('scaleForm').addEventListener('submit', function(e) {
       e.preventDefault();
       const tonicInput = document.getElementById('tonic').value.trim();
-      const tonic = tonicInput.charAt(0).toUpperCase() + tonicInput.slice(1);
+      // Preserve the original tonic for display (e.g., "Bb")
+      const displayTonic = tonicInput;
+      // For computation, if the tonic contains a flat, convert it to its sharp equivalent
+      // so that we can find it in the notes array.
+      const normalizedTonic = tonicInput.includes("b") ? convertFlatToSharp(tonicInput) : tonicInput;
       const scaleType = document.getElementById('scaleType').value;
       const instrument = document.getElementById('instrument').value;
       let customTuning = null;
@@ -491,11 +524,11 @@
       }
       const resultsDiv = document.getElementById('results');
       resultsDiv.innerHTML = '';
-      if (!tonic || notes.indexOf(tonic) === -1) {
-        resultsDiv.innerHTML = '<p>Please enter a valid tonic note (e.g., C, C#, D, etc.).</p>';
+      if (!normalizedTonic || notes.indexOf(normalizedTonic) === -1) {
+        resultsDiv.innerHTML = '<p>Please enter a valid tonic note (e.g., C, C#, D, Bb, etc.).</p>';
         return;
       }
-      let chords = generateChords(tonic, scaleType, instrument, customTuning);
+      let chords = generateChords(normalizedTonic, scaleType, instrument, customTuning, displayTonic);
       let maxFingerings = chords.reduce((max, chord) => Math.max(max, chord.fingerings.length), 0);
       let table = document.createElement('table');
       table.classList.add('scale-table');
