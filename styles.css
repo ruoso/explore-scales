@@ -1,0 +1,70 @@
+body {
+  font-family: Arial, sans-serif;
+  background: #f7f7f7;
+  margin: 0;
+  padding: 20px;
+}
+.container {
+  max-width: 1000px;
+  margin: auto;
+  background: #fff;
+  padding: 20px 30px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+h1 {
+  text-align: center;
+  color: #333;
+}
+.form-group {
+  margin-bottom: 15px;
+}
+label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: #555;
+}
+input[type="text"], select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+button.submit-btn {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  background: #007BFF;
+  color: #fff;
+  font-size: 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+button.submit-btn:hover {
+  background: #0056b3;
+}
+.result {
+  margin-top: 25px;
+}
+.scale-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  text-align: center;
+}
+.scale-table th, .scale-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  vertical-align: middle;
+}
+.scale-header {
+  background: #f0f0f0;
+  font-weight: bold;
+}
+.chord-details {
+  font-size: 0.9em;
+  color: #333;
+}
