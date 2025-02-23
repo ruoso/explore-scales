@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Harmonic Scale Explorer - Custom Tuning, DFS & SVG Chord Diagrams</title>
+  <title>Harmonic Scale Explorer - Custom Tuning, DFS, and SVG Diagrams</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -116,7 +116,7 @@
     const defaultTuning6 = "E2, A2, D3, G3, B3, E4";
     const defaultTuning7 = "B1, E2, A2, D3, G3, B3, E4";
 
-    // Chord quality, Roman numeral, and functional labels.
+    // Chord qualities, Roman numeral mapping, and function labels.
     const chordQualities = {
       major: ["major", "minor", "minor", "major", "major", "minor", "diminished"],
       minor: ["minor", "diminished", "major", "minor", "minor", "major", "major"],
@@ -198,7 +198,7 @@
       return intervals.map(interval => notes[(rootIndex + interval) % 12]);
     }
 
-    // Convert chord quality to common chord symbol.
+    // Convert chord quality to a common chord symbol.
     function getChordSymbol(root, quality) {
       switch (quality) {
         case "major": return root;
@@ -209,7 +209,7 @@
       }
     }
 
-    // Given a tuning object and a fret number, compute produced pitch.
+    // Given a tuning object and a fret, compute produced pitch (e.g., "E2").
     function getProducedPitch(tuningObj, fret) {
       let baseIndex = notes.indexOf(tuningObj.note);
       let total = baseIndex + fret;
@@ -218,7 +218,7 @@
       return producedNote + (tuningObj.octave + octaveIncrease);
     }
 
-    // Helper: convert pitch string (e.g., "E2") to numeric value.
+    // Helper: convert pitch string (e.g., "E2") to a numeric value.
     function pitchToValue(pitch) {
       let match = pitch.match(/^([A-G]#?)(\d+)$/);
       if (!match) return null;
@@ -308,7 +308,6 @@
           if (hasBefore && hasAfter) return false;
         }
       }
-      // New constraint: produced pitches of non-muted strings must be strictly increasing.
       let nonMuted = producedPitches.filter(p => p !== null);
       let nonMutedValues = nonMuted.map(p => pitchToValue(p));
       for (let i = 0; i < nonMutedValues.length - 1; i++) {
@@ -367,13 +366,17 @@
     // SVG Rendering Function
     // ---------------------------
     function renderChordSVG(candidateStr, tuning) {
-      // candidateStr is like "x 0 2 3 1 0".
+      // candidateStr is something like "x 0 2 3 1 0".
       let candidate = candidateStr.split(" ");
       let numStrings = tuning.length;
-      // Determine the minimum pressed fret (ignore "0" and "x")
+      // Determine if any fretted note is greater than 4.
       let pressed = candidate.filter(val => val !== "x" && val !== "0").map(val => parseInt(val));
-      let minPressed = pressed.length > 0 ? Math.min(...pressed) : 1;
-      let displayStartFret = minPressed;
+      let displayStartFret;
+      if (pressed.length === 0 || Math.max(...pressed) <= 4) {
+        displayStartFret = 1; // Anchor at the nut.
+      } else {
+        displayStartFret = Math.min(...pressed);
+      }
       let numFretsToShow = 4;
       let width = 120;
       let height = 160;
@@ -384,7 +387,7 @@
       let svg = `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">`;
       // Draw vertical lines for strings.
       for (let i = 0; i < numStrings; i++) {
-        let x = marginLeft + i * stringSpacing + stringSpacing/2;
+        let x = marginLeft + i * stringSpacing + stringSpacing / 2;
         svg += `<line x1="${x}" y1="${marginTop}" x2="${x}" y2="${height}" stroke="black" stroke-width="1" />`;
       }
       // Draw horizontal fret lines.
@@ -395,7 +398,7 @@
       }
       // Render open/mute markers above the nut.
       for (let i = 0; i < numStrings; i++) {
-        let x = marginLeft + i * stringSpacing + stringSpacing/2;
+        let x = marginLeft + i * stringSpacing + stringSpacing / 2;
         let mark = candidate[i];
         if (mark === "x") {
           svg += `<text x="${x}" y="${marginTop - 5}" text-anchor="middle" font-size="12" fill="red">X</text>`;
@@ -408,16 +411,15 @@
         let mark = candidate[i];
         if (mark !== "x" && mark !== "0") {
           let fret = parseInt(mark);
-          let fretPosition = fret - displayStartFret; // 0-based index in our span
-          // Center of the cell:
-          let x = marginLeft + i * stringSpacing + stringSpacing/2;
+          let fretPosition = fret - displayStartFret; // 0-based index in our span.
+          let x = marginLeft + i * stringSpacing + stringSpacing / 2;
           let y = marginTop + (fretPosition + 0.5) * fretSpacing;
-          svg += `<circle cx="${x}" cy="${y}" r="${stringSpacing/4}" fill="black" />`;
+          svg += `<circle cx="${x}" cy="${y}" r="${stringSpacing / 4}" fill="black" />`;
         }
       }
-      // If displayStartFret > 1, show the starting fret number.
+      // If displayStartFret > 1, show that fret number on the left.
       if (displayStartFret > 1) {
-        svg += `<text x="5" y="${marginTop + fretSpacing/2}" font-size="12" fill="black">${displayStartFret}</text>`;
+        svg += `<text x="5" y="${marginTop + fretSpacing / 2}" font-size="12" fill="black">${displayStartFret}</text>`;
       }
       svg += `</svg>`;
       return svg;
@@ -448,7 +450,6 @@
       }
       let chords = generateChords(tonic, scaleType, instrument, customTuning);
       let maxFingerings = chords.reduce((max, chord) => Math.max(max, chord.fingerings.length), 0);
-      // Build table.
       let table = document.createElement('table');
       table.classList.add('scale-table');
       let degreeRow = document.createElement('tr');
@@ -465,7 +466,6 @@
       });
       table.appendChild(degreeRow);
       table.appendChild(functionRow);
-      // Chord info row.
       let chordInfoRow = document.createElement('tr');
       chords.forEach(chord => {
         let td = document.createElement('td');
@@ -474,14 +474,12 @@
         chordInfoRow.appendChild(td);
       });
       table.appendChild(chordInfoRow);
-      // For each candidate fingering variation, render an SVG diagram.
       for (let i = 0; i < maxFingerings; i++) {
         let row = document.createElement('tr');
         chords.forEach(chord => {
           let td = document.createElement('td');
           td.classList.add('chord-details');
           if (chord.fingerings[i]) {
-            // Render SVG for this candidate.
             td.innerHTML = renderChordSVG(chord.fingerings[i], customTuning);
           } else {
             td.textContent = "";
