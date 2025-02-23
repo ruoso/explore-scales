@@ -1,5 +1,21 @@
 import { notes } from './constants.js';
-import { getProducedPitch, pitchToValue } from './chord-render.js';
+
+function getProducedPitch(tuningObj, fret) {
+  let baseIndex = notes.indexOf(tuningObj.note);
+  let total = baseIndex + fret;
+  let producedNote = notes[total % 12];
+  let octaveIncrease = Math.floor(total / 12);
+  return producedNote + (tuningObj.octave + octaveIncrease);
+}
+
+function pitchToValue(pitch) {
+  let match = pitch.match(/^([A-G]#?)(\d+)$/);
+  if (!match) return null;
+  let note = match[1];
+  let octave = parseInt(match[2], 10);
+  return notes.indexOf(note) + 12 * octave;
+}
+
 
 function dfsCandidatesForSpan(chordNotes, tuning, minFret, maxFret, index, fundamentalFound, currentAssignment, results) {
   if (index === tuning.length) {

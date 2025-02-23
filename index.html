@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Harmonic Scale Explorer - Extended String Instruments with Query Parameters and Flat Support</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="main.js" type="module"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>Harmonic Scale Explorer</h1>
+    <form id="scaleForm" action="." method="get">
+      <div class="form-group">
+        <label for="tonic">Tonic Chord</label>
+        <!-- Change input to select -->
+        <select id="tonic" name="tonic" required>
+          <option value="C">C</option>
+          <option value="C#">C#</option>
+          <option value="Db">Db</option>
+          <option value="D">D</option>
+          <option value="D#">D#</option>
+          <option value="Eb">Eb</option>
+          <option value="E">E</option>
+          <option value="F">F</option>
+          <option value="F#">F#</option>
+          <option value="Gb">Gb</option>
+          <option value="G">G</option>
+          <option value="G#">G#</option>
+          <option value="Ab">Ab</option>
+          <option value="A">A</option>
+          <option value="A#">A#</option>
+          <option value="Bb">Bb</option>
+          <option value="B">B</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="scaleType">Scale Type</label>
+        <select id="scaleType" name="scaleType" required></select>
+      </div>
+      <div class="form-group">
+        <label for="instrument">Instrument</label>
+        <select id="instrument" name="instrument" required></select>
+      </div>
+      <div class="form-group" id="tuningGroup">
+        <label for="tuningPreset">Tuning Preset:</label>
+        <select id="tuningPreset" name="tuningPreset"></select>
+        <label for="customTuning" style="margin-top: 10px;">Custom Tuning (optional):</label>
+        <input type="text" id="customTuning" name="customTuning" placeholder="e.g., E2, A2, D3, G3, B3, E4">
+      </div>
+      <button type="submit" class="submit-btn">Generate Chords</button>
+    </form>
+    <div id="results" class="result"></div>
+  </div>
+</body>
+</html>

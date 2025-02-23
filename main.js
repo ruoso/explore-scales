@@ -1,7 +1,6 @@
 import { notes, tuningPresets, scales } from './constants.js';
-
-import { getProducedPitch, renderChordSVG } from './chord-render.js';
-import { computeGuitarFingerings } from './fingering.js';
+import { renderChordSVG } from './chord-render.js';
+import { generateChords } from './gen-scale.js';
 
 // ============================
 // Helper Functions
@@ -32,45 +31,28 @@ function convertFlatToSharp(note) {
 // ============================
 // Tuning Controls and Query Parameter Functions
 // ============================
+let isInitialLoad = true;
+
 const instrumentSelect = document.getElementById("instrument");
 const tuningGroup = document.getElementById("tuningGroup");
-instrumentSelect.addEventListener("change", function() {
-  populateTuningControls(this.value);
-  updateQueryFromForm();
-});
-instrumentSelect.dispatchEvent(new Event("change"));
 
-function populateTuningControls(instrument) {
-  let presets = tuningPresets[instrument];
-  tuningGroup.innerHTML = "";
-  if (!presets) {
-    tuningGroup.style.display = "none";
-    return;
+function populateTuningPresets(instrument) {
+  const tuningPresetSelect = document.getElementById('tuningPreset');
+  tuningPresetSelect.innerHTML = "";
+  const presets = tuningPresets[instrument];
+  if (presets) {
+    presets.forEach(preset => {
+      const option = document.createElement('option');
+      option.value = preset.tuning;
+      option.textContent = `${preset.name} (${preset.tuning})`;
+      tuningPresetSelect.appendChild(option);
+    });
   }
-  tuningGroup.style.display = "block";
-  let presetLabel = document.createElement("label");
-  presetLabel.setAttribute("for", "tuningPreset");
-  presetLabel.textContent = "Tuning Preset:";
-  tuningGroup.appendChild(presetLabel);
-  let presetSelect = document.createElement("select");
-  presetSelect.id = "tuningPreset";
-  for (let preset of presets) {
-    let option = document.createElement("option");
-    option.value = preset.tuning;
-    option.textContent = preset.name + " (" + preset.tuning + ")";
-    presetSelect.appendChild(option);
+  // Set the tuningPreset value from the query parameter if it exists
+  const params = getQueryParams();
+  if (params.tuningPreset) {
+    tuningPresetSelect.value = params.tuningPreset;
   }
-  tuningGroup.appendChild(presetSelect);
-  let customLabel = document.createElement("label");
-  customLabel.setAttribute("for", "customTuning");
-  customLabel.textContent = "Custom Tuning (optional):";
-  customLabel.style.marginTop = "10px";
-  tuningGroup.appendChild(customLabel);
-  let customInput = document.createElement("input");
-  customInput.type = "text";
-  customInput.id = "customTuning";
-  customInput.placeholder = "e.g., E2, A2, D3, G3, B3, E4";
-  tuningGroup.appendChild(customInput);
 }
 
 function getQueryParams() {
@@ -79,7 +61,9 @@ function getQueryParams() {
   if (search.length > 1) {
     search.substring(1).split("&").forEach(function(item) {
       let parts = item.split("=");
-      params[decodeURIComponent(parts[0])] = decodeURIComponent(parts[1] || "");
+      let key = decodeURIComponent(parts[0].replace(/\+/g, " "));
+      let value = decodeURIComponent((parts[1] || "").replace(/\+/g, " "));
+      params[key] = value;
     });
   }
   return params;
@@ -95,114 +79,53 @@ function populateFormFromQuery() {
   }
   if (params.instrument) {
     document.getElementById("instrument").value = params.instrument;
-    instrumentSelect.dispatchEvent(new Event("change"));
-  }
-  if (params.tuningPreset && document.getElementById("tuningPreset")) {
-    document.getElementById("tuningPreset").value = params.tuningPreset;
   }
   if (params.customTuning && document.getElementById("customTuning")) {
     document.getElementById("customTuning").value = params.customTuning;
   }
-}
-
-function updateQueryFromForm() {
-  const tonic = document.getElementById("tonic").value.trim();
-  const scaleType = document.getElementById("scaleType").value;
-  const instrument = document.getElementById("instrument").value;
-  let tuningPreset = "";
-  let customTuning = "";
-  if (tuningPresets[instrument]) {
-    tuningPreset = document.getElementById("tuningPreset").value;
-    customTuning = document.getElementById("customTuning").value.trim();
-  }
-  const params = new URLSearchParams();
-  params.set("tonic", tonic);
-  params.set("scaleType", scaleType);
-  params.set("instrument", instrument);
-  if (tuningPreset) params.set("tuningPreset", tuningPreset);
-  if (customTuning) params.set("customTuning", customTuning);
-  history.replaceState(null, "", "?" + params.toString());
-}
-
-// ============================
-// Core Calculation Functions
-// ============================
-function computeScale(tonic, scaleType) {
-  let scale = [tonic];
-  let currentIndex = notes.indexOf(tonic);
-  for (let interval of scales[scaleType].pattern) {
-    currentIndex = (currentIndex + interval) % 12;
-    scale.push(notes[currentIndex]);
-  }
-  return scale;
-}
-
-function computeChordNotes(root, quality) {
-  const formulas = {
-    major: [0, 4, 7],
-    minor: [0, 3, 7],
-    diminished: [0, 3, 6],
-    augmented: [0, 4, 8]
-  };
-  let intervals = formulas[quality];
-  let rootIndex = notes.indexOf(root);
-  return intervals.map(interval => notes[(rootIndex + interval) % 12]);
-}
-
-function getChordSymbol(root, quality, useFlat) {
-  let symbol;
-  switch (quality) {
-    case "major": symbol = root; break;
-    case "minor": symbol = root + "m"; break;
-    case "diminished": symbol = root + "°"; break;
-    case "augmented": symbol = root + "+"; break;
-    default: symbol = root;
-  }
-  if (useFlat) {
-    const sharpToFlat = { "A#": "Bb", "C#": "Db", "D#": "Eb", "F#": "Gb", "G#": "Ab" };
-    if (sharpToFlat[symbol]) {
-      symbol = sharpToFlat[symbol];
+  // Call populateTuningPresets after the form is fully populated
+  if (params.instrument) {
+    populateTuningPresets(params.instrument);
+    if (params.tuningPreset && document.getElementById("tuningPreset")) {
+      document.getElementById("tuningPreset").value = params.tuningPreset;
     }
   }
-  return symbol;
 }
 
-// ============================
-// Main Function: generateChords
-// ============================
-function generateChords(tonic, scaleType, instrument, customTuning, displayTonic) {
-  let scale = computeScale(tonic, scaleType);
-  let qualities = scales[scaleType].chordQualities || [];
-  let useFlat = displayTonic.includes("b");
-  let results = [];
+// Populate scale type and instrument selects
+function populateSelects() {
+  const scaleTypeSelect = document.getElementById('scaleType');
+  const instrumentSelect = document.getElementById('instrument');
+  const tuningPresetSelect = document.getElementById('tuningPreset');
 
-  for (let i = 0; i < scale.length; i++) {
-    if (i >= qualities.length) break;  // Avoid accessing undefined chord qualities
-
-    let chordRoot = scale[i];
-    let quality = qualities[i];
-    let chordNotes = computeChordNotes(chordRoot, quality);
-    let chordSymbol = getChordSymbol(chordRoot, quality, useFlat);
-    let fingerings = computeGuitarFingerings(chordNotes, customTuning);
-
-    results.push({
-      degree: scales[scaleType].romanMapping?.[i] || "",
-      functionLabel: scales[scaleType].functionsMapping?.[i] || "",
-      chordSymbol: chordSymbol,
-      chordNotes: chordNotes,
-      fingerings: fingerings
-    });
+  // Populate scale types
+  for (const [key, value] of Object.entries(scales)) {
+    const option = document.createElement('option');
+    option.value = key;
+    option.textContent = value.name;
+    scaleTypeSelect.appendChild(option);
   }
 
-  return results;
+  // Populate instruments
+  for (const [key, value] of Object.entries(tuningPresets)) {
+    const option = document.createElement('option');
+    option.value = key;
+    option.textContent = key.replace(/\d/g, '') + ' (' + key.replace(/\D/g, '') + '‑String)';
+    instrumentSelect.appendChild(option);
+  }
 }
 
-// ============================
-// Form Submission Handler
-// ============================
-document.getElementById('scaleForm').addEventListener('submit', function(e) {
-  e.preventDefault();
-  updateQueryFromForm();
+function populateTonicSelect() {
+  const tonicSelect = document.getElementById('tonic');
+  notes.forEach(note => {
+    const option = document.createElement('option');
+    option.value = note;
+    option.textContent = note;
+    tonicSelect.appendChild(option);
+  });
+}
+
+function generateChordsFromForm() {
   const tonicInput = document.getElementById('tonic').value.trim();
   // Preserve the original tonic for display (e.g., "Bb")
   const displayTonic = tonicInput;
@@ -265,4 +188,20 @@ document.getElementById('scaleForm').addEventListener('submit', function(e) {
     table.appendChild(row);
   }
   resultsDiv.appendChild(table);
+}
+
+window.handleInputChange = function() {
+  if (!isInitialLoad) {
+    document.getElementById('scaleForm').submit();
+  }
+};
+
+// Call populateSelects on page load
+document.addEventListener('DOMContentLoaded', () => {
+  populateTonicSelect();
+  populateSelects();
+  populateFormFromQuery();
+  generateChordsFromForm();
+  isInitialLoad = false;
 });
+
