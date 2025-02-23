@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Harmonic Scale Explorer - Custom Tuning & DFS Candidate Generator</title>
+  <title>Harmonic Scale Explorer - DFS Guitar Fingering Generator with Increasing Pitches</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -116,7 +116,7 @@
     const defaultTuning6 = "E2, A2, D3, G3, B3, E4";
     const defaultTuning7 = "B1, E2, A2, D3, G3, B3, E4";
 
-    // Chord Quality, Roman numeral, and Functional labels
+    // Chord qualities, Roman numeral mapping, and function labels.
     const chordQualities = {
       major: ["major", "minor", "minor", "major", "major", "minor", "diminished"],
       minor: ["minor", "diminished", "major", "minor", "minor", "major", "major"],
@@ -152,7 +152,7 @@
     });
     instrumentSelect.dispatchEvent(new Event("change"));
 
-    // Parse a tuning string into an array of objects { note, octave }.
+    // Parse tuning string into an array of objects { note, octave }.
     function parseGuitarTuning(tuningStr) {
       let parts = tuningStr.split(",");
       let tuning = [];
@@ -185,8 +185,8 @@
       return scale;
     }
 
-    // Compute chord notes (the chord is defined by its quality) given a chord root.
-    // The first note is the chord's fundamental.
+    // Compute chord notes given a chord root and its quality.
+    // The first note is the chord fundamental.
     function computeChordNotes(root, quality) {
       const formulas = {
         major: [0, 4, 7],
@@ -217,6 +217,15 @@
       let producedNote = notes[total % 12];
       let octaveIncrease = Math.floor(total / 12);
       return producedNote + (tuningObj.octave + octaveIncrease);
+    }
+
+    // Helper: convert pitch string (e.g., "E2") to a numeric value.
+    function pitchToValue(pitch) {
+      let match = pitch.match(/^([A-G]#?)(\d+)$/);
+      if (!match) return null;
+      let note = match[1];
+      let octave = parseInt(match[2], 10);
+      return notes.indexOf(note) + 12 * octave;
     }
 
     // Recursive DFS candidate generator for a given fret span.
@@ -273,20 +282,24 @@
       return results;
     }
 
-    // Filtering function: rejects candidate if:
+    // Filtering function: reject candidate if:
     // - The first non-muted string's produced pitch (ignoring octave) is not the chord fundamental.
     // - The last 3 strings are muted.
     // - Duplicate produced pitches (with octave) occur.
-    // - A muted string is isolated (i.e. a mute occurs between two sounded strings).
+    // - A muted string is isolated (i.e., a mute occurs between two sounded strings).
+    // - The produced pitches (ignoring muted strings) are not strictly increasing.
     function filterCandidate(candidate, tuning, chordNotes) {
       let producedPitches = candidate.map((assign, i) =>
         assign === "x" ? null : getProducedPitch(tuning[i], parseInt(assign))
       );
+      // Check first non-muted string.
       let firstNonMuted = producedPitches.find(p => p !== null);
       if (!firstNonMuted || firstNonMuted.replace(/\d/, "") !== chordNotes[0]) return false;
+      // Last 3 strings must not be muted.
       for (let i = tuning.length - 3; i < tuning.length; i++) {
         if (producedPitches[i] === null) return false;
       }
+      // No duplicate produced pitches (with octave).
       let pitchSet = new Set();
       for (let p of producedPitches) {
         if (p !== null) {
@@ -294,6 +307,7 @@
           pitchSet.add(p);
         }
       }
+      // Reject candidate if a muted string is isolated in the middle of non-muted strings.
       for (let i = 0; i < candidate.length; i++) {
         if (candidate[i] === "x") {
           let hasBefore = candidate.slice(0, i).some(a => a !== "x");
@@ -301,10 +315,16 @@
           if (hasBefore && hasAfter) return false;
         }
       }
+      // New constraint: the produced pitches (for non-muted strings) must be strictly increasing.
+      let nonMuted = producedPitches.filter(p => p !== null);
+      let nonMutedValues = nonMuted.map(p => pitchToValue(p));
+      for (let i = 0; i < nonMutedValues.length - 1; i++) {
+        if (nonMutedValues[i] >= nonMutedValues[i+1]) return false;
+      }
       return true;
     }
 
-    // Main DFS candidate generation: iterate maxFret from 3 to 15.
+    // Main DFS candidate generation: iterate maxFret from 3 to 15, generate candidates via DFS, and filter them.
     function computeGuitarFingerings(chordNotes, tuning) {
       let candidates = new Set();
       for (let maxFret = 3; maxFret <= 15; maxFret++) {
@@ -319,14 +339,14 @@
       return Array.from(candidates);
     }
 
-    // For piano, simply return two variants.
+    // For piano, return two variants.
     function computePianoFingerings(chordNotes) {
       let candidate1 = chordNotes.join(" ");
       let candidate2 = chordNotes.slice(1).concat(chordNotes[0]).join(" ");
       return [candidate1, candidate2];
     }
 
-    // Generate chords: compute the scale, then for each degree compute chord and candidate fingerings.
+    // Generate chords: compute scale, then for each degree compute chord notes and candidate fingerings.
     function generateChords(tonic, scaleType, instrument, customTuning) {
       let scale = computeScale(tonic, scaleType);
       let qualities = chordQualities[scaleType];
