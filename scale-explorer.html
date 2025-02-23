@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Harmonic Scale Explorer - DFS Guitar Fingering Generator (No Isolated Mutes)</title>
+  <title>Harmonic Scale Explorer - Custom Tuning & DFS Candidate Generator</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -100,68 +100,73 @@
           <option value="piano">Piano</option>
         </select>
       </div>
+      <!-- Custom tuning input for guitar -->
+      <div class="form-group" id="tuningGroup">
+        <label for="guitarTuning">Guitar Tuning (comma separated, e.g., E2, A2, D3, G3, B3, E4)</label>
+        <input type="text" id="guitarTuning" value="E2, A2, D3, G3, B3, E4">
+      </div>
       <button type="submit" class="submit-btn">Generate Chords</button>
     </form>
     <div id="results" class="result"></div>
   </div>
 
   <script>
-    // The 12 chromatic notes (using sharps)
+    // Constants and Default Tunings
     const notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+    const defaultTuning6 = "E2, A2, D3, G3, B3, E4";
+    const defaultTuning7 = "B1, E2, A2, D3, G3, B3, E4";
 
-    // Guitar tunings with octave information.
-    const tuning6 = [
-      { note: "E", octave: 2 },  // 6th (lowest)
-      { note: "A", octave: 2 },  // 5th
-      { note: "D", octave: 3 },  // 4th
-      { note: "G", octave: 3 },  // 3rd
-      { note: "B", octave: 3 },  // 2nd
-      { note: "E", octave: 4 }   // 1st (highest)
-    ];
-
-    const tuning7 = [
-      { note: "B", octave: 1 },
-      { note: "E", octave: 2 },
-      { note: "A", octave: 2 },
-      { note: "D", octave: 3 },
-      { note: "G", octave: 3 },
-      { note: "B", octave: 3 },
-      { note: "E", octave: 4 }
-    ];
-
-    // Chord quality mapping per scale type.
+    // Chord Quality, Roman numeral, and Functional labels
     const chordQualities = {
       major: ["major", "minor", "minor", "major", "major", "minor", "diminished"],
       minor: ["minor", "diminished", "major", "minor", "minor", "major", "major"],
       harmonicMinor: ["minor", "diminished", "augmented", "minor", "major", "major", "diminished"]
     };
 
-    // Roman numeral mapping.
     const romanMapping = {
       major: ["I", "ii", "iii", "IV", "V", "vi", "vii°"],
       minor: ["i", "ii°", "III", "iv", "v", "VI", "VII"],
       harmonicMinor: ["i", "ii°", "III+", "iv", "V", "VI", "vii°"]
     };
 
-    // Functional labels.
     const functionsMapping = {
       major: ["Tonic", "Supertonic", "Mediant", "Subdominant", "Dominant", "Submediant", "Leading Tone"],
       minor: ["Tonic", "Supertonic", "Mediant", "Subdominant", "Dominant", "Submediant", "Subtonic"],
       harmonicMinor: ["Tonic", "Supertonic", "Mediant", "Subdominant", "Dominant", "Submediant", "Leading Tone"]
     };
 
-    // Convert chord quality to a common chord symbol.
-    function getChordSymbol(root, quality) {
-      switch (quality) {
-        case "major": return root;
-        case "minor": return root + "m";
-        case "diminished": return root + "°";
-        case "augmented": return root + "+";
-        default: return root;
+    // Show/hide custom tuning input based on instrument selection.
+    const instrumentSelect = document.getElementById("instrument");
+    const tuningGroup = document.getElementById("tuningGroup");
+    instrumentSelect.addEventListener("change", function() {
+      if (this.value === "piano") {
+        tuningGroup.style.display = "none";
+      } else {
+        tuningGroup.style.display = "block";
+        if (this.value === "6guitar") {
+          document.getElementById("guitarTuning").value = defaultTuning6;
+        } else if (this.value === "7guitar") {
+          document.getElementById("guitarTuning").value = defaultTuning7;
+        }
       }
+    });
+    instrumentSelect.dispatchEvent(new Event("change"));
+
+    // Parse a tuning string into an array of objects { note, octave }.
+    function parseGuitarTuning(tuningStr) {
+      let parts = tuningStr.split(",");
+      let tuning = [];
+      for (let part of parts) {
+        part = part.trim();
+        let match = part.match(/^([A-G][#]?)(\d+)$/);
+        if (match) {
+          tuning.push({ note: match[1], octave: parseInt(match[2], 10) });
+        }
+      }
+      return tuning;
     }
 
-    // Compute the 7-note scale.
+    // Compute a 7-note scale given a tonic and scale type.
     function computeScale(tonic, scaleType) {
       let intervals;
       if (scaleType === "major") {
@@ -180,7 +185,7 @@
       return scale;
     }
 
-    // Compute chord notes given a chord root and its quality.
+    // Compute chord notes (the chord is defined by its quality) given a chord root.
     // The first note is the chord's fundamental.
     function computeChordNotes(root, quality) {
       const formulas = {
@@ -194,7 +199,18 @@
       return intervals.map(interval => notes[(rootIndex + interval) % 12]);
     }
 
-    // Given a tuning object and fret number, compute produced pitch (e.g., "E2", "G#3").
+    // Convert chord quality to a common chord symbol.
+    function getChordSymbol(root, quality) {
+      switch (quality) {
+        case "major": return root;
+        case "minor": return root + "m";
+        case "diminished": return root + "°";
+        case "augmented": return root + "+";
+        default: return root;
+      }
+    }
+
+    // Given a tuning object and a fret number, compute the produced pitch (e.g., "E2", "G#3").
     function getProducedPitch(tuningObj, fret) {
       let baseIndex = notes.indexOf(tuningObj.note);
       let total = baseIndex + fret;
@@ -203,15 +219,13 @@
       return producedNote + (tuningObj.octave + octaveIncrease);
     }
 
-    // Recursive DFS: generate all candidate fingerings for the given fret span.
-    // currentAssignment is an array (one element per string) and results is an array to collect complete assignments.
+    // Recursive DFS candidate generator for a given fret span.
     function dfsCandidatesForSpan(chordNotes, tuning, minFret, maxFret, index, fundamentalFound, currentAssignment, results) {
       if (index === tuning.length) {
         results.push(currentAssignment.slice());
         return;
       }
       let options = [];
-      // For this string, determine possible assignments.
       let possible = [];
       // Option: open string.
       let openNote = tuning[index].note;
@@ -226,22 +240,19 @@
           possible.push({ fret: fret, produced: producedNote });
         }
       }
-      // If the fundamental is not yet found, then if any option produces the fundamental, restrict to those.
+      // If fundamental not yet found, restrict to options that produce the fundamental.
       if (!fundamentalFound) {
         let fundamentalOptions = possible.filter(opt => opt.produced === chordNotes[0]);
         if (fundamentalOptions.length > 0) {
           options = fundamentalOptions;
         } else {
-          // Otherwise, the only allowed option is to mute.
           options = [];
         }
       } else {
-        // If fundamental already found, allow all options.
         options = possible;
       }
       // Always allow mute.
       options.push("x");
-      // Recurse for each option.
       for (let opt of options) {
         let newFundamentalFound = fundamentalFound;
         if (opt !== "x" && !fundamentalFound) {
@@ -255,30 +266,27 @@
       }
     }
 
-    // Wrapper: generate all candidate fingerings (each as an array of strings) for the given fret span.
+    // Wrapper: generate all candidate assignments for a given fret span.
     function generateCandidatesForSpan(chordNotes, tuning, minFret, maxFret) {
       let results = [];
       dfsCandidatesForSpan(chordNotes, tuning, minFret, maxFret, 0, false, [], results);
       return results;
     }
 
-    // Filtering function: reject candidate if...
+    // Filtering function: rejects candidate if:
     // - The first non-muted string's produced pitch (ignoring octave) is not the chord fundamental.
     // - The last 3 strings are muted.
     // - Duplicate produced pitches (with octave) occur.
-    // - A muted string occurs in the middle of non-muted strings.
+    // - A muted string is isolated (i.e. a mute occurs between two sounded strings).
     function filterCandidate(candidate, tuning, chordNotes) {
       let producedPitches = candidate.map((assign, i) =>
         assign === "x" ? null : getProducedPitch(tuning[i], parseInt(assign))
       );
-      // Check first non-muted string.
       let firstNonMuted = producedPitches.find(p => p !== null);
       if (!firstNonMuted || firstNonMuted.replace(/\d/, "") !== chordNotes[0]) return false;
-      // Last 3 strings must not be muted.
       for (let i = tuning.length - 3; i < tuning.length; i++) {
         if (producedPitches[i] === null) return false;
       }
-      // No duplicate produced pitches (including octave).
       let pitchSet = new Set();
       for (let p of producedPitches) {
         if (p !== null) {
@@ -286,19 +294,17 @@
           pitchSet.add(p);
         }
       }
-      // Check: no muted string in the middle of sounded strings.
       for (let i = 0; i < candidate.length; i++) {
         if (candidate[i] === "x") {
-          // If there is any non-muted string before AND after index i, reject.
           let hasBefore = candidate.slice(0, i).some(a => a !== "x");
-          let hasAfter = candidate.slice(i+1).some(a => a !== "x");
+          let hasAfter = candidate.slice(i + 1).some(a => a !== "x");
           if (hasBefore && hasAfter) return false;
         }
       }
       return true;
     }
 
-    // Main DFS candidate generation: iterate maxFret values (from 3 to 15), generate all candidates via DFS, and filter them.
+    // Main DFS candidate generation: iterate maxFret from 3 to 15.
     function computeGuitarFingerings(chordNotes, tuning) {
       let candidates = new Set();
       for (let maxFret = 3; maxFret <= 15; maxFret++) {
@@ -313,7 +319,7 @@
       return Array.from(candidates);
     }
 
-    // For piano, provide two variants.
+    // For piano, simply return two variants.
     function computePianoFingerings(chordNotes) {
       let candidate1 = chordNotes.join(" ");
       let candidate2 = chordNotes.slice(1).concat(chordNotes[0]).join(" ");
@@ -321,7 +327,7 @@
     }
 
     // Generate chords: compute the scale, then for each degree compute chord and candidate fingerings.
-    function generateChords(tonic, scaleType, instrument) {
+    function generateChords(tonic, scaleType, instrument, customTuning) {
       let scale = computeScale(tonic, scaleType);
       let qualities = chordQualities[scaleType];
       let results = [];
@@ -331,10 +337,8 @@
         let chordNotes = computeChordNotes(chordRoot, quality);
         let chordSymbol = getChordSymbol(chordRoot, quality);
         let fingerings;
-        if (instrument === "6guitar") {
-          fingerings = computeGuitarFingerings(chordNotes, tuning6);
-        } else if (instrument === "7guitar") {
-          fingerings = computeGuitarFingerings(chordNotes, tuning7);
+        if (instrument === "6guitar" || instrument === "7guitar") {
+          fingerings = computeGuitarFingerings(chordNotes, customTuning);
         } else if (instrument === "piano") {
           fingerings = computePianoFingerings(chordNotes);
         }
@@ -356,21 +360,24 @@
       const tonic = tonicInput.charAt(0).toUpperCase() + tonicInput.slice(1);
       const scaleType = document.getElementById('scaleType').value;
       const instrument = document.getElementById('instrument').value;
+      let customTuning = null;
+      if (instrument === "6guitar" || instrument === "7guitar") {
+        let tuningStr = document.getElementById('guitarTuning').value;
+        customTuning = parseGuitarTuning(tuningStr);
+        if (customTuning.length === 0) {
+          customTuning = instrument === "6guitar" ? parseGuitarTuning(defaultTuning6) : parseGuitarTuning(defaultTuning7);
+        }
+      }
       const resultsDiv = document.getElementById('results');
       resultsDiv.innerHTML = '';
-
       if (!tonic || notes.indexOf(tonic) === -1) {
         resultsDiv.innerHTML = '<p>Please enter a valid tonic note (e.g., C, C#, D, etc.).</p>';
         return;
       }
-
-      let chords = generateChords(tonic, scaleType, instrument);
+      let chords = generateChords(tonic, scaleType, instrument, customTuning);
       let maxFingerings = chords.reduce((max, chord) => Math.max(max, chord.fingerings.length), 0);
-
-      // Build table with header rows.
       let table = document.createElement('table');
       table.classList.add('scale-table');
-
       let degreeRow = document.createElement('tr');
       let functionRow = document.createElement('tr');
       chords.forEach(chord => {
@@ -378,7 +385,6 @@
         tdDegree.classList.add('scale-header');
         tdDegree.textContent = chord.degree;
         degreeRow.appendChild(tdDegree);
-
         let tdFunction = document.createElement('td');
         tdFunction.classList.add('scale-header');
         tdFunction.textContent = chord.functionLabel;
@@ -386,8 +392,6 @@
       });
       table.appendChild(degreeRow);
       table.appendChild(functionRow);
-
-      // Chord info row.
       let chordInfoRow = document.createElement('tr');
       chords.forEach(chord => {
         let td = document.createElement('td');
@@ -396,8 +400,6 @@
         chordInfoRow.appendChild(td);
       });
       table.appendChild(chordInfoRow);
-
-      // One row per candidate fingering variation.
       for (let i = 0; i < maxFingerings; i++) {
         let row = document.createElement('tr');
         chords.forEach(chord => {
@@ -408,7 +410,6 @@
         });
         table.appendChild(row);
       }
-
       resultsDiv.appendChild(table);
     });
   </script>
