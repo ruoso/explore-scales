@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Harmonic Scale Explorer - Custom Tuning, DFS, and SVG Diagrams</title>
+  <title>Harmonic Scale Explorer - Extended Tunings with Customization</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -95,16 +95,14 @@
       <div class="form-group">
         <label for="instrument">Instrument</label>
         <select id="instrument" required>
-          <option value="6guitar">6 String Guitar</option>
-          <option value="7guitar">7 String Guitar</option>
+          <!-- Multiple guitar instrument options and Piano -->
+          <option value="6guitar">6‑String Guitar</option>
+          <option value="7guitar">7‑String Guitar</option>
           <option value="piano">Piano</option>
         </select>
       </div>
-      <!-- Custom tuning input for guitar -->
-      <div class="form-group" id="tuningGroup">
-        <label for="guitarTuning">Guitar Tuning (comma separated, e.g., E2, A2, D3, G3, B3, E4)</label>
-        <input type="text" id="guitarTuning" value="E2, A2, D3, G3, B3, E4">
-      </div>
+      <!-- Tuning controls appear when a guitar instrument is selected -->
+      <div class="form-group" id="tuningGroup"></div>
       <button type="submit" class="submit-btn">Generate Chords</button>
     </form>
     <div id="results" class="result"></div>
@@ -113,29 +111,41 @@
   <script>
     // Constants and Default Tunings
     const notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+    const tuningPresets = {
+      "6guitar": [
+        { name: "Standard", tuning: "E2, A2, D3, G3, B3, E4" },
+        { name: "Drop D", tuning: "D2, A2, D3, G3, B3, E4" },
+        { name: "Open G", tuning: "D2, G2, D3, G3, B3, D4" },
+        { name: "Open D", tuning: "D2, A2, D3, F#3, A3, D4" },
+        { name: "DADGAD", tuning: "D2, A2, D3, G3, A3, D4" },
+        { name: "Open C", tuning: "C2, G2, C3, G3, E3, G3" }
+      ],
+      "7guitar": [
+        { name: "Standard", tuning: "B1, E2, A2, D3, G3, B3, E4" },
+        { name: "Brazilian", tuning: "C1, E2, A2, D3, G3, B3, E4" }
+      ]
+    };
     const defaultTuning6 = "E2, A2, D3, G3, B3, E4";
     const defaultTuning7 = "B1, E2, A2, D3, G3, B3, E4";
 
-    // Chord qualities, Roman numeral mapping, and function labels.
+    // Chord qualities, Roman numeral mapping, and functional labels.
     const chordQualities = {
       major: ["major", "minor", "minor", "major", "major", "minor", "diminished"],
       minor: ["minor", "diminished", "major", "minor", "minor", "major", "major"],
       harmonicMinor: ["minor", "diminished", "augmented", "minor", "major", "major", "diminished"]
     };
-
     const romanMapping = {
       major: ["I", "ii", "iii", "IV", "V", "vi", "vii°"],
       minor: ["i", "ii°", "III", "iv", "v", "VI", "VII"],
       harmonicMinor: ["i", "ii°", "III+", "iv", "V", "VI", "vii°"]
     };
-
     const functionsMapping = {
       major: ["Tonic", "Supertonic", "Mediant", "Subdominant", "Dominant", "Submediant", "Leading Tone"],
       minor: ["Tonic", "Supertonic", "Mediant", "Subdominant", "Dominant", "Submediant", "Subtonic"],
       harmonicMinor: ["Tonic", "Supertonic", "Mediant", "Subdominant", "Dominant", "Submediant", "Leading Tone"]
     };
 
-    // Show/hide custom tuning input based on instrument selection.
+    // Show/hide and populate tuning controls based on instrument selection.
     const instrumentSelect = document.getElementById("instrument");
     const tuningGroup = document.getElementById("tuningGroup");
     instrumentSelect.addEventListener("change", function() {
@@ -143,14 +153,39 @@
         tuningGroup.style.display = "none";
       } else {
         tuningGroup.style.display = "block";
-        if (this.value === "6guitar") {
-          document.getElementById("guitarTuning").value = defaultTuning6;
-        } else if (this.value === "7guitar") {
-          document.getElementById("guitarTuning").value = defaultTuning7;
-        }
+        populateTuningControls(this.value);
       }
     });
     instrumentSelect.dispatchEvent(new Event("change"));
+
+    function populateTuningControls(instrument) {
+      let presets = tuningPresets[instrument];
+      tuningGroup.innerHTML = "";
+      let presetLabel = document.createElement("label");
+      presetLabel.setAttribute("for", "tuningPreset");
+      presetLabel.textContent = "Tuning Preset:";
+      tuningGroup.appendChild(presetLabel);
+      let presetSelect = document.createElement("select");
+      presetSelect.id = "tuningPreset";
+      for (let preset of presets) {
+        let option = document.createElement("option");
+        option.value = preset.tuning;
+        option.textContent = preset.name + " (" + preset.tuning + ")";
+        presetSelect.appendChild(option);
+      }
+      tuningGroup.appendChild(presetSelect);
+      // Also add a text box for custom tuning.
+      let customLabel = document.createElement("label");
+      customLabel.setAttribute("for", "customTuning");
+      customLabel.textContent = "Custom Tuning (optional):";
+      customLabel.style.marginTop = "10px";
+      tuningGroup.appendChild(customLabel);
+      let customInput = document.createElement("input");
+      customInput.type = "text";
+      customInput.id = "customTuning";
+      customInput.placeholder = "e.g., E2, A2, D3, G3, B3, E4";
+      tuningGroup.appendChild(customInput);
+    }
 
     // Parse tuning string into an array of objects { note, octave }.
     function parseGuitarTuning(tuningStr) {
@@ -209,7 +244,7 @@
       }
     }
 
-    // Given a tuning object and a fret, compute produced pitch (e.g., "E2").
+    // Given a tuning object and a fret, compute produced pitch.
     function getProducedPitch(tuningObj, fret) {
       let baseIndex = notes.indexOf(tuningObj.note);
       let total = baseIndex + fret;
@@ -218,7 +253,7 @@
       return producedNote + (tuningObj.octave + octaveIncrease);
     }
 
-    // Helper: convert pitch string (e.g., "E2") to a numeric value.
+    // Helper: convert pitch string to numeric value.
     function pitchToValue(pitch) {
       let match = pitch.match(/^([A-G]#?)(\d+)$/);
       if (!match) return null;
@@ -366,14 +401,13 @@
     // SVG Rendering Function
     // ---------------------------
     function renderChordSVG(candidateStr, tuning) {
-      // candidateStr is something like "x 0 2 3 1 0".
       let candidate = candidateStr.split(" ");
       let numStrings = tuning.length;
-      // Determine if any fretted note is greater than 4.
       let pressed = candidate.filter(val => val !== "x" && val !== "0").map(val => parseInt(val));
       let displayStartFret;
+      // If no pressed fret is greater than 4, anchor at nut.
       if (pressed.length === 0 || Math.max(...pressed) <= 4) {
-        displayStartFret = 1; // Anchor at the nut.
+        displayStartFret = 1;
       } else {
         displayStartFret = Math.min(...pressed);
       }
@@ -385,18 +419,18 @@
       let stringSpacing = (width - marginLeft) / numStrings;
       let fretSpacing = (height - marginTop) / numFretsToShow;
       let svg = `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">`;
-      // Draw vertical lines for strings.
+      // Vertical string lines.
       for (let i = 0; i < numStrings; i++) {
         let x = marginLeft + i * stringSpacing + stringSpacing / 2;
         svg += `<line x1="${x}" y1="${marginTop}" x2="${x}" y2="${height}" stroke="black" stroke-width="1" />`;
       }
-      // Draw horizontal fret lines.
+      // Horizontal fret lines.
       for (let j = 0; j <= numFretsToShow; j++) {
         let y = marginTop + j * fretSpacing;
         let strokeWidth = j === 0 ? 3 : 1;
         svg += `<line x1="${marginLeft}" y1="${y}" x2="${width}" y2="${y}" stroke="black" stroke-width="${strokeWidth}" />`;
       }
-      // Render open/mute markers above the nut.
+      // Render open/mute markers.
       for (let i = 0; i < numStrings; i++) {
         let x = marginLeft + i * stringSpacing + stringSpacing / 2;
         let mark = candidate[i];
@@ -411,15 +445,14 @@
         let mark = candidate[i];
         if (mark !== "x" && mark !== "0") {
           let fret = parseInt(mark);
-          let fretPosition = fret - displayStartFret; // 0-based index in our span.
+          let fretPosition = fret - displayStartFret;
           let x = marginLeft + i * stringSpacing + stringSpacing / 2;
           let y = marginTop + (fretPosition + 0.5) * fretSpacing;
-          svg += `<circle cx="${x}" cy="${y}" r="${stringSpacing / 4}" fill="black" />`;
+          svg += `<circle cx="${x}" cy="${y}" r="${stringSpacing/4}" fill="black" />`;
         }
       }
-      // If displayStartFret > 1, show that fret number on the left.
       if (displayStartFret > 1) {
-        svg += `<text x="5" y="${marginTop + fretSpacing / 2}" font-size="12" fill="black">${displayStartFret}</text>`;
+        svg += `<text x="5" y="${marginTop + fretSpacing/2}" font-size="12" fill="black">${displayStartFret}</text>`;
       }
       svg += `</svg>`;
       return svg;
@@ -436,11 +469,12 @@
       const instrument = document.getElementById('instrument').value;
       let customTuning = null;
       if (instrument === "6guitar" || instrument === "7guitar") {
-        let tuningStr = document.getElementById('guitarTuning').value;
+        let tuningPresetSelect = document.getElementById("tuningPreset");
+        let presetTuningStr = tuningPresetSelect.value;
+        let customTuningStr = document.getElementById("customTuning").value.trim();
+        // If a custom tuning is provided, use it; otherwise, use the preset.
+        let tuningStr = customTuningStr !== "" ? customTuningStr : presetTuningStr;
         customTuning = parseGuitarTuning(tuningStr);
-        if (customTuning.length === 0) {
-          customTuning = instrument === "6guitar" ? parseGuitarTuning(defaultTuning6) : parseGuitarTuning(defaultTuning7);
-        }
       }
       const resultsDiv = document.getElementById('results');
       resultsDiv.innerHTML = '';
