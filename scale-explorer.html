@@ -84,13 +84,48 @@
         <label for="tonic">Tonic Chord</label>
         <!-- User may enter flats like "Bb" -->
         <input type="text" id="tonic" placeholder="e.g., C or Bb" required>
-      </div>
-      <div class="form-group">
+      </div>      <div class="form-group">
         <label for="scaleType">Scale Type</label>
         <select id="scaleType" required>
-          <option value="major">Major</option>
-          <option value="minor">Natural Minor</option>
+          <option value="major">Major (Ionian)</option>
+          <option value="naturalMinor">Natural Minor (Aeolian)</option>
           <option value="harmonicMinor">Harmonic Minor</option>
+          <option value="melodicMinor">Melodic Minor (Ascending)</option>
+          <option value="majorPentatonic">Pentatonic Major</option>
+          <option value="minorPentatonic">Pentatonic Minor</option>
+          <option value="blues">Blues Scale</option>
+          <option value="dorian">Dorian</option>
+          <option value="phrygian">Phrygian</option>
+          <option value="lydian">Lydian</option>
+          <option value="mixolydian">Mixolydian</option>
+          <option value="locrian">Locrian</option>
+          <option value="dorianSharp4">Dorian ♯4</option>
+          <option value="phrygianDominant">Phrygian Dominant</option>
+          <option value="lydianSharp2">Lydian ♯2</option>
+          <option value="mixolydianFlat6">Mixolydian ♭6</option>
+          <option value="locrianSharp6">Locrian ♯6</option>
+          <option value="alteredDominant">Altered Dominant (Super Locrian ♭♭7)</option>
+          <option value="lydianAugmented">Lydian Augmented</option>
+          <option value="lydianDominant">Lydian Dominant</option>
+          <option value="mixolydianFlat6">Mixolydian ♭6</option>
+          <option value="locrianSharp2">Locrian ♯2</option>
+          <option value="altered">Altered Scale (Super Locrian)</option>
+          <option value="wholeTone">Whole Tone Scale</option>
+          <option value="diminishedHalfWhole">Diminished (Half-Whole)</option>
+          <option value="diminishedWholeHalf">Diminished (Whole-Half)</option>
+          <option value="augmented">Augmented Scale</option>
+          <option value="hungarianMinor">Hungarian Minor</option>
+          <option value="spanishPhrygian">Spanish Phrygian (Flamenco)</option>
+          <option value="neapolitanMajor">Neapolitan Major</option>
+          <option value="neapolitanMinor">Neapolitan Minor</option>
+          <option value="persian">Persian Scale</option>
+          <option value="hirajoshi">Japanese Hirajoshi</option>
+          <option value="inScale">Japanese In Scale</option>
+          <option value="enigmatic">Enigmatic Scale</option>
+          <option value="bebopMajor">Bebop Major</option>
+          <option value="bebopDominant">Bebop Dominant</option>
+          <option value="bebopMinor">Bebop Minor</option>
+          <option value="majorLocrian">Major Locrian</option>
         </select>
       </div>
       <div class="form-group">
@@ -185,20 +220,103 @@
     // ============================
     const chordQualities = {
       major: ["major", "minor", "minor", "major", "major", "minor", "diminished"],
-      minor: ["minor", "diminished", "major", "minor", "minor", "major", "major"],
-      harmonicMinor: ["minor", "diminished", "augmented", "minor", "major", "major", "diminished"]
+      naturalMinor: ["minor", "diminished", "major", "minor", "minor", "major", "major"],
+      harmonicMinor: ["minor", "diminished", "augmented", "minor", "major", "major", "diminished"],
+      melodicMinor: ["minor", "minor", "augmented", "major", "major", "diminished", "diminished"],
+      majorPentatonic: ["major", "major", "minor", "minor", "major"],
+      minorPentatonic: ["minor", "minor", "major", "major", "minor"],
+      blues: ["minor", "major", "major", "minor", "diminished", "minor"],
+      dorian: ["minor", "minor", "major", "major", "minor", "diminished", "major"],
+      phrygian: ["minor", "major", "major", "minor", "diminished", "major", "minor"],
+      lydian: ["major", "major", "minor", "diminished", "major", "minor", "minor"],
+      mixolydian: ["major", "minor", "diminished", "major", "minor", "minor", "major"],
+      locrian: ["diminished", "major", "minor", "minor", "major", "major", "minor"],
+      wholeTone: ["augmented", "augmented", "augmented", "augmented", "augmented", "augmented"],
+      diminishedHalfWhole: ["diminished", "minor", "minor", "major", "major", "minor", "diminished", "diminished"],
+      diminishedWholeHalf: ["diminished", "diminished", "minor", "major", "minor", "major", "minor", "major"],
+      augmented: ["augmented", "augmented", "augmented", "augmented", "augmented", "augmented"],
+      hungarianMinor: ["minor", "diminished", "augmented", "major", "major", "minor", "diminished"],
+      spanishPhrygian: ["major", "diminished", "augmented", "minor", "major", "major", "diminished"],
+      neapolitanMajor: ["major", "major", "major", "minor", "minor", "major", "diminished"],
+      neapolitanMinor: ["minor", "major", "major", "major", "minor", "diminished", "diminished"],
+      persian: ["major", "diminished", "augmented", "minor", "major", "major", "diminished"],
+      hirajoshi: ["minor", "minor", "diminished", "augmented", "augmented"],
+      inScale: ["minor", "augmented", "diminished", "major", "major"],
+      enigmatic: ["major", "diminished", "augmented", "minor", "major", "major", "diminished"],
+      bebopMajor: ["major", "major", "minor", "minor", "major", "major", "minor", "diminished"],
+      bebopDominant: ["major", "minor", "minor", "major", "major", "minor", "diminished", "major"],
+      bebopMinor: ["minor", "minor", "major", "major", "minor", "diminished", "diminished", "major"],
+      majorLocrian: ["major", "minor", "diminished", "minor", "minor", "major", "major"],
+      dorianSharp4: ["minor", "minor", "major", "major", "minor", "diminished", "major"],
+      phrygianDominant: ["major", "major", "minor", "diminished", "major", "minor", "minor"],
+      lydianSharp2: ["major", "major", "minor", "diminished", "major", "minor", "minor"],
+      mixolydianFlat6: ["major", "minor", "diminished", "major", "minor", "minor", "major"],
+      locrianSharp6: ["diminished", "major", "minor", "minor", "major", "major", "minor"],
+      alteredDominant: ["diminished", "minor", "minor", "major", "major", "minor", "diminished"],
+      lydianAugmented: ["major", "major", "minor", "diminished", "major", "minor", "minor"],
+      lydianDominant: ["major", "major", "minor", "diminished", "major", "minor", "minor"]
     };
 
     const romanMapping = {
       major: ["I", "ii", "iii", "IV", "V", "vi", "vii°"],
-      minor: ["i", "ii°", "III", "iv", "v", "VI", "VII"],
-      harmonicMinor: ["i", "ii°", "III+", "iv", "V", "VI", "vii°"]
+      naturalMinor: ["i", "ii°", "III", "iv", "v", "VI", "VII"],
+      harmonicMinor: ["i", "ii°", "III+", "iv", "V", "VI", "vii°"],
+      melodicMinor: ["i", "ii", "III+", "IV", "V", "vi°", "vii°"],
+      majorPentatonic: ["I", "II", "iii", "V", "vi"],
+      minorPentatonic: ["i", "III", "IV", "V", "VII"],
+      blues: ["i", "III", "IV", "IV+", "V", "VII"],
+      dorian: ["i", "ii", "III", "IV", "v", "vi°", "VII"],
+      phrygian: ["i", "II", "III", "iv", "v°", "VI", "VII"],
+      lydian: ["I", "II", "iii", "IV+", "V", "vi", "vii"],
+      mixolydian: ["I", "ii", "iii°", "IV", "v", "vi", "VII"],
+      locrian: ["i°", "II", "iii", "iv", "V", "VI", "VII"],
+      wholeTone: ["I+", "II+", "III+", "V", "VI", "VII"],
+      diminishedHalfWhole: ["i°", "ii", "III", "iv", "V", "VI", "VII", "I"],
+      diminishedWholeHalf: ["i°", "II", "iii", "IV", "V", "vi", "vii", "I"],
+      augmented: ["I+", "II+", "III+", "IV+", "V+", "VI+"],
+      hungarianMinor: ["i", "ii°", "III+", "IV", "V", "vi", "vii°"],
+      spanishPhrygian: ["I", "II", "III+", "iv", "V", "VI", "VII"],
+      neapolitanMajor: ["I", "II", "III", "IV", "V", "VI", "vii°"],
+      neapolitanMinor: ["i", "II", "III", "IV", "v", "VI", "VII"],
+      persian: ["I", "II", "iii+", "iv", "V", "VI", "VII"],
+      hirajoshi: ["i", "III", "iv", "vii", "VIII"],
+      inScale: ["i", "iv", "V", "VII", "VIII"],
+      enigmatic: ["I", "ii", "III+", "iv", "V", "VI", "VII"],
+      bebopMajor: ["I", "II", "iii", "IV", "V", "VI", "vii", "VII"],
+      bebopDominant: ["I", "ii", "iii", "IV", "V", "VI", "vii°", "VII"],
+      bebopMinor: ["i", "ii", "III", "IV", "V", "VI", "VII", "I"],
+      majorLocrian: ["I", "ii", "iii", "IV", "v", "VI", "VII"],
+      dorianSharp4: ["i", "ii", "III", "IV", "v", "vi°", "VII"],
+      phrygianDominant: ["I", "II", "iii", "iv°", "V", "vi", "vii"],
+      lydianSharp2: ["I", "II", "iii", "iv°", "V", "vi", "vii"],
+      mixolydianFlat6: ["I", "ii", "iii°", "IV", "v", "vi", "VII"],
+      locrianSharp6: ["i°", "II", "iii", "iv", "V", "VI", "VII"],
+      alteredDominant: ["i°", "ii", "iii", "IV", "V", "vi", "vii°"],
+      lydianAugmented: ["I", "II", "iii", "iv°", "V", "vi", "vii"],
+      lydianDominant: ["I", "II", "iii", "iv°", "V", "vi", "vii"]
     };
 
     const functionsMapping = {
       major: ["Tonic", "Supertonic", "Mediant", "Subdominant", "Dominant", "Submediant", "Leading Tone"],
-      minor: ["Tonic", "Supertonic", "Mediant", "Subdominant", "Dominant", "Submediant", "Subtonic"],
-      harmonicMinor: ["Tonic", "Supertonic", "Mediant", "Subdominant", "Dominant", "Submediant", "Leading Tone"]
+      naturalMinor: ["Tonic", "Supertonic", "Mediant", "Subdominant", "Dominant", "Submediant", "Subtonic"],
+      harmonicMinor: ["Tonic", "Supertonic", "Mediant", "Subdominant", "Dominant", "Submediant", "Leading Tone"],
+      melodicMinor: ["Tonic", "Supertonic", "Mediant", "Subdominant", "Dominant", "Submediant", "Leading Tone"],
+      majorPentatonic: ["Tonic", "Supertonic", "Mediant", "Dominant", "Submediant"],
+      minorPentatonic: ["Tonic", "Mediant", "Subdominant", "Dominant", "Subtonic"],
+      blues: ["Tonic", "Mediant", "Subdominant", "Augmented Fourth", "Dominant", "Subtonic"],
+      dorian: ["Tonic", "Supertonic", "Mediant", "Subdominant", "Dominant", "Submediant", "Leading Tone"],
+      phrygian: ["Tonic", "Supertonic", "Mediant", "Subdominant", "Dominant", "Submediant", "Leading Tone"],
+      lydian: ["Tonic", "Supertonic", "Mediant", "Augmented Fourth", "Dominant", "Submediant", "Leading Tone"],
+      mixolydian: ["Tonic", "Supertonic", "Mediant", "Subdominant", "Dominant", "Submediant", "Subtonic"],
+      locrian: ["Tonic", "Supertonic", "Mediant", "Subdominant", "Diminished Fifth", "Submediant", "Leading Tone"],
+      dorianSharp4: ["Tonic", "Supertonic", "Mediant", "Subdominant", "Dominant", "Submediant", "Leading Tone"],
+      phrygianDominant: ["Tonic", "Supertonic", "Mediant", "Subdominant", "Dominant", "Submediant", "Leading Tone"],
+      lydianSharp2: ["Tonic", "Supertonic", "Mediant", "Subdominant", "Dominant", "Submediant", "Leading Tone"],
+      mixolydianFlat6: ["Tonic", "Supertonic", "Mediant", "Subdominant", "Dominant", "Submediant", "Leading Tone"],
+      locrianSharp6: ["Tonic", "Supertonic", "Mediant", "Subdominant", "Dominant", "Submediant", "Leading Tone"],
+      alteredDominant: ["Tonic", "Supertonic", "Mediant", "Subdominant", "Dominant", "Submediant", "Leading Tone"],
+      lydianAugmented: ["Tonic", "Supertonic", "Mediant", "Subdominant", "Dominant", "Submediant", "Leading Tone"],
+      lydianDominant: ["Tonic", "Supertonic", "Mediant", "Subdominant", "Dominant", "Submediant", "Leading Tone"]
     };
 
     // ============================
@@ -300,18 +418,41 @@
     // Core Calculation Functions
     // ============================
     function computeScale(tonic, scaleType) {
-      let intervals;
-      if (scaleType === "major") {
-        intervals = [2, 2, 1, 2, 2, 2, 1];
-      } else if (scaleType === "minor") {
-        intervals = [2, 1, 2, 2, 1, 2, 2];
-      } else if (scaleType === "harmonicMinor") {
-        intervals = [2, 1, 2, 2, 1, 3, 1];
-      }
+      const scalePatterns = {
+        major: [2, 2, 1, 2, 2, 2, 1],
+        naturalMinor: [2, 1, 2, 2, 1, 2, 2],
+        harmonicMinor: [2, 1, 2, 2, 1, 3, 1],
+        melodicMinor: [2, 1, 2, 2, 2, 2, 1],
+        majorPentatonic: [2, 2, 3, 2, 3],
+        minorPentatonic: [3, 2, 2, 3, 2],
+        blues: [3, 2, 1, 1, 3, 2],
+        dorian: [2, 1, 2, 2, 2, 1, 2],
+        phrygian: [1, 2, 2, 2, 1, 2, 2],
+        lydian: [2, 2, 2, 1, 2, 2, 1],
+        mixolydian: [2, 2, 1, 2, 2, 1, 2],
+        locrian: [1, 2, 2, 1, 2, 2, 2],
+        wholeTone: [2, 2, 2, 2, 2, 2],
+        diminishedHalfWhole: [1, 2, 1, 2, 1, 2, 1, 2],
+        diminishedWholeHalf: [2, 1, 2, 1, 2, 1, 2, 1],
+        augmented: [3, 1, 3, 1, 3, 1],
+        hungarianMinor: [2, 1, 3, 1, 1, 3, 1],
+        spanishPhrygian: [1, 3, 1, 2, 1, 2, 2],
+        neapolitanMajor: [1, 2, 2, 2, 2, 2, 1],
+        neapolitanMinor: [1, 2, 2, 2, 1, 3, 1],
+        persian: [1, 3, 1, 2, 1, 3, 1],
+        hirajoshi: [2, 1, 4, 1, 4],
+        inScale: [1, 4, 2, 3, 2],
+        enigmatic: [1, 3, 2, 2, 2, 1, 1],
+        bebopMajor: [2, 2, 1, 2, 1, 2, 2, 1],
+        bebopDominant: [2, 2, 1, 2, 2, 1, 1, 1],
+        bebopMinor: [2, 1, 2, 2, 1, 1, 2, 1],
+        majorLocrian: [2, 2, 1, 1, 2, 2, 2]
+      };
+
       let scale = [tonic];
       let currentIndex = notes.indexOf(tonic);
-      for (let i = 0; i < intervals.length - 1; i++) {
-        currentIndex = (currentIndex + intervals[i]) % 12;
+      for (let interval of scalePatterns[scaleType]) {
+        currentIndex = (currentIndex + interval) % 12;
         scale.push(notes[currentIndex]);
       }
       return scale;
@@ -519,23 +660,28 @@
     // ============================
     function generateChords(tonic, scaleType, instrument, customTuning, displayTonic) {
       let scale = computeScale(tonic, scaleType);
-      let qualities = chordQualities[scaleType];
+      let qualities = chordQualities[scaleType] || [];
       let useFlat = displayTonic.includes("b");
       let results = [];
+
       for (let i = 0; i < scale.length; i++) {
+        if (i >= qualities.length) break;  // Avoid accessing undefined chord qualities
+
         let chordRoot = scale[i];
         let quality = qualities[i];
         let chordNotes = computeChordNotes(chordRoot, quality);
         let chordSymbol = getChordSymbol(chordRoot, quality, useFlat);
         let fingerings = computeGuitarFingerings(chordNotes, customTuning);
+
         results.push({
-          degree: romanMapping[scaleType][i],
-          functionLabel: functionsMapping[scaleType][i],
+          degree: romanMapping[scaleType]?.[i] || "",
+          functionLabel: functionsMapping[scaleType]?.[i] || "",
           chordSymbol: chordSymbol,
           chordNotes: chordNotes,
           fingerings: fingerings
         });
       }
+
       return results;
     }
 
