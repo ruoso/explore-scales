@@ -115,16 +115,6 @@ function populateSelects() {
   }
 }
 
-function populateTonicSelect() {
-  const tonicSelect = document.getElementById('tonic');
-  notes.forEach(note => {
-    const option = document.createElement('option');
-    option.value = note;
-    option.textContent = note;
-    tonicSelect.appendChild(option);
-  });
-}
-
 function generateChordsFromForm() {
   const tonicInput = document.getElementById('tonic').value.trim();
   // Preserve the original tonic for display (e.g., "Bb")
@@ -198,7 +188,6 @@ window.handleInputChange = function() {
 
 // Call populateSelects on page load
 document.addEventListener('DOMContentLoaded', () => {
-  populateTonicSelect();
   populateSelects();
   populateFormFromQuery();
   generateChordsFromForm();
