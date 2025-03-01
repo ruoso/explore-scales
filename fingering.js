@@ -17,13 +17,22 @@ function pitchToValue(pitch) {
 }
 
 
-function dfsCandidatesForSpan(chordNotes, tuning, minFret, maxFret, index, fundamentalFound, currentAssignment, results) {
-  if (index === tuning.length) {
-    results.push(currentAssignment.slice());
-    return;
+function dfsCandidatesForSpan(chordNotes, tuning, minFret, maxFret, fundamentalFound, currentAssignment) {
+  if (currentAssignment.length === tuning.length) {
+    // check that we have all the notes in the chord
+    let chordNoteSet = new Set(chordNotes);
+    let producedNotes = currentAssignment.map((assign, i) =>
+      assign === "x" ? null : getProducedPitch(tuning[i], parseInt(assign)).replace(/\d/, "")
+    );
+    let producedNoteSet = new Set(producedNotes);
+    for (let note of chordNoteSet) {
+      if (!producedNoteSet.has(note)) return [];
+    }
+    return [ currentAssignment.slice() ];
   }
   let options = [];
   let possible = [];
+  let index = currentAssignment.length;
   let openNote = tuning[index].note;
   if (chordNotes.includes(openNote)) {
     possible.push({ fret: 0, produced: openNote });
@@ -36,29 +45,30 @@ function dfsCandidatesForSpan(chordNotes, tuning, minFret, maxFret, index, funda
     }
   }
   if (!fundamentalFound) {
-    let fundamentalOptions = possible.filter(opt => opt.produced === chordNotes[0]);
-    options = fundamentalOptions.length > 0 ? fundamentalOptions : [];
+    options = possible.filter(opt => opt.produced === chordNotes[0]);
   } else {
     options = possible;
   }
   options.push("x");
+  let results = [];
   for (let opt of options) {
-    let newFundamentalFound = fundamentalFound;
-    if (opt !== "x" && !fundamentalFound) {
-      if (opt.produced === chordNotes[0]) {
-        newFundamentalFound = true;
-      }
+    let newAssignment = currentAssignment.slice();
+    if (opt === "x") {
+      newAssignment.push("x");
+      let inner = dfsCandidatesForSpan(chordNotes, tuning, minFret, maxFret, fundamentalFound, newAssignment);
+      // inner is an array of all candidates, append it to the final result array
+      results = results.concat(inner);
+    } else {
+      newAssignment.push(opt.fret.toString());
+      let inner = dfsCandidatesForSpan(chordNotes, tuning, minFret, maxFret, true, newAssignment);
+      results = results.concat(inner);
     }
-    currentAssignment.push(opt === "x" ? "x" : opt.fret.toString());
-    dfsCandidatesForSpan(chordNotes, tuning, minFret, maxFret, index + 1, newFundamentalFound, currentAssignment, results);
-    currentAssignment.pop();
   }
+  return results;
 }
 
 function generateCandidatesForSpan(chordNotes, tuning, minFret, maxFret) {
-  let results = [];
-  dfsCandidatesForSpan(chordNotes, tuning, minFret, maxFret, 0, false, [], results);
-  return results;
+  return dfsCandidatesForSpan(chordNotes, tuning, minFret, maxFret, false, []);
 }
 
 function filterCandidate(candidate, tuning, chordNotes) {
@@ -123,7 +133,7 @@ function filterCandidate(candidate, tuning, chordNotes) {
   return true;
 }
 
-function computeGuitarFingerings(chordNotes, tuning) {
+export function computeGuitarFingerings(chordNotes, tuning) {
   let candidates = new Set();
   for (let maxFret = 3; maxFret <= 15; maxFret++) {
     let minFret = maxFret >= 4 ? maxFret - 3 : 1;
@@ -136,5 +146,3 @@ function computeGuitarFingerings(chordNotes, tuning) {
   }
   return Array.from(candidates);
 }
-
-export { computeGuitarFingerings };

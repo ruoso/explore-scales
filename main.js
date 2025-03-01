@@ -1,4 +1,4 @@
-import { notes, tuningPresets, scales } from './constants.js';
+import { notes, tuningPresets, scales, formulas } from './constants.js';
 import { renderChordSVG } from './chord-render.js';
 import { generateChords, computeScale } from './gen-scale.js';
 import { renderScaleStaff } from './scale-render.js';
@@ -30,6 +30,28 @@ function convertFlatToSharp(note) {
 // ============================
 // Chord and Scale Mappings
 // ============================
+// New constant for chord extension intervals (in semitones)
+const extensionIntervals = {
+  "7": 10,
+  "9": 14,
+  "11": 17,
+  "13": 21
+};
+
+// New function to calculate chord notes including extensions
+function calculateChordNotes(rootIndex, chordType, selectedExtensions) {
+  // Assuming 'formulas' and 'notes' are imported from constants.js
+  const baseFormula = formulas[chordType];
+  const chordNotes = baseFormula.map(interval => notes[(rootIndex + interval) % notes.length]);
+  
+  selectedExtensions.forEach(ext => {
+    if (extensionIntervals[ext] !== undefined) {
+      chordNotes.push(notes[(rootIndex + extensionIntervals[ext]) % notes.length]);
+    }
+  });
+  return chordNotes;
+}
+
 // ============================
 // Tuning Controls and Query Parameter Functions
 // ============================
@@ -82,6 +104,11 @@ function populateFormFromQuery() {
   if (params.scaleType) {
     document.getElementById("scaleType").value = params.scaleType;
   }
+  for (let i = 1; i < 8; i++) {
+    if (params[`extensions-${i}`]) {
+      document.getElementById(`extensions-${i}`).value = params[`extensions-${i}`];
+    }
+  }
   if (params.instrument) {
     document.getElementById("instrument").value = params.instrument;
   }
@@ -120,6 +147,31 @@ function populateSelects() {
   }
 }
 
+function appendFingeringRow(table, chords, customTuning) {
+  let i = 0;
+  while (true) {
+    let hasFingerings = false;
+    let row = document.createElement('tr');
+    chords.forEach(chord => {
+      let td = document.createElement('td');
+      td.classList.add('chord-details');
+      if (chord.fingerings[i]) {
+        td.innerHTML = renderChordSVG(chord.fingerings[i], customTuning);
+        hasFingerings = true;
+      } else {
+        td.textContent = "";
+      }
+      row.appendChild(td);
+    });
+    if (hasFingerings) {
+      table.appendChild(row);
+      i++;
+    } else {
+      break;
+    }
+  }
+}
+
 function generateChordsFromForm() {
   const tonicInput = document.getElementById('tonic').value.trim();
   // Preserve the original tonic for display (e.g., "Bb")
@@ -142,8 +194,15 @@ function generateChordsFromForm() {
     resultsDiv.innerHTML = '<p>Please enter a valid tonic note (e.g., C, C#, D, Bb, etc.).</p>';
     return;
   }
-  let chords = generateChords(normalizedTonic, scaleType, instrument, customTuning, displayTonic);
-  let maxFingerings = chords.reduce((max, chord) => Math.max(max, chord.fingerings.length), 0);
+
+  // extract extensions from form checkboxes
+
+  let extensions = [];
+  for (let i = 1; i < 8; i++) {
+    let ext = document.getElementById(`extensions-${i}`).value;
+    extensions.push(ext);
+  }
+  let chords = generateChords(normalizedTonic, scaleType, extensions, instrument, customTuning, displayTonic);
   let table = document.createElement('table');
   table.classList.add('scale-table');
   let degreeRow = document.createElement('tr');
@@ -160,30 +219,51 @@ function generateChordsFromForm() {
   });
   table.appendChild(degreeRow);
   table.appendChild(functionRow);
-  let chordInfoRow = document.createElement('tr');
-  chords.forEach(chord => {
+  
+  let chordSymbolRow = document.createElement('tr');
+  chords.forEach((chord, index) => {
     let td = document.createElement('td');
     td.classList.add('chord-details');
-    td.innerHTML = `<strong>${chord.chordSymbol}</strong><br>Notes: ${chord.chordNotes.join(", ")}`;
-    chordInfoRow.appendChild(td);
+    let extensionsInputName = `extensions-${index}`;
+    td.innerHTML = `<strong>${chord.chordSymbol}</strong>`;
+    chordSymbolRow.appendChild(td);
   });
-  table.appendChild(chordInfoRow);
-  for (let i = 0; i < maxFingerings; i++) {
-    let row = document.createElement('tr');
-    chords.forEach(chord => {
-      let td = document.createElement('td');
-      td.classList.add('chord-details');
-      if (chord.fingerings[i]) {
-        td.innerHTML = renderChordSVG(chord.fingerings[i], customTuning);
-      } else {
-        td.textContent = "";
-      }
-      row.appendChild(td);
-    });
-    table.appendChild(row);
-  }
+  table.appendChild(chordSymbolRow);
+
+  let chordFinalNotesRow = document.createElement('tr');
+  chords.forEach((chord, index) => {
+    let td = document.createElement('td');
+    td.classList.add('chord-details');
+    td.innerHTML = chord.chordNotes.join(", ");
+    chordFinalNotesRow.appendChild(td);
+  });
+  table.appendChild(chordFinalNotesRow);
+
+  appendFingeringRow(table, chords, customTuning);
   resultsDiv.appendChild(table);
 }
+
+// Event delegation: update chord notes when an extension checkbox changes
+document.addEventListener('change', function(e) {
+  if (e.target.classList.contains('chord-extension')) {
+    let container = e.target.closest('.extensions');
+    // Get the chord's base root and chord type from data attributes
+    const rootNote = container.getAttribute('data-root');
+    const chordType = container.getAttribute('data-chord-type');
+    const rootIndex = notes.indexOf(rootNote);
+    // Gather checked extension values from this container
+    const selectedExtNodes = container.querySelectorAll('.chord-extension:checked');
+    const selectedExtensions = Array.from(selectedExtNodes).map(el => el.value);
+    // Calculate new chord notes using the updated extensions
+    const newChordNotes = calculateChordNotes(rootIndex, chordType, selectedExtensions);
+    // Update the sibling element displaying the chord notes
+    const td = container.parentElement;
+    let notesDiv = td.querySelector('.updated-notes');
+    if (notesDiv) {
+      notesDiv.innerHTML = `Chord Notes: ${newChordNotes.join(", ")}`;
+    }
+  }
+});
 
 function updateScaleNotes() {
   const tonic = tonicSelect.value;
@@ -218,10 +298,10 @@ document.addEventListener('DOMContentLoaded', () => {
   populateFormFromQuery();
   generateChordsFromForm();
   updateScaleNotes();
-  isInitialLoad = false;
   const playScaleBtn = document.getElementById("playScaleBtn");
   if (playScaleBtn) {
     playScaleBtn.addEventListener("click", playScaleFromForm);
   }
+  isInitialLoad = false;
 });
 

@@ -1,4 +1,4 @@
-import { notes, scales, formulas } from './constants.js';
+import { notes, scales, formulas, extensionNames } from './constants.js';
 import { computeGuitarFingerings } from './fingering.js';
 
 function computeScale(tonic, scaleType) {
@@ -11,14 +11,27 @@ function computeScale(tonic, scaleType) {
   return scale;
 }
 
-function computeChordNotes(root, quality) {
+function computeChordNotes(root, quality, extensions) {
   let intervals = formulas[quality];
   let rootIndex = notes.indexOf(root);
+  if (extensions) {
+    // break the extension string where it is a number followed by non-numbers, and there
+    // can be multiple of them, such as 7M9
+    for (let ext of extensions.match(/(\d+\D*)/g)) {
+      intervals.push(extensionNames[ext]);
+    }
+  }
   return intervals.map(interval => notes[(rootIndex + interval) % 12]);
 }
 
-function getChordSymbol(root, quality, useFlat) {
+function getChordSymbol(root, quality, extensions, useFlat) {
   let symbol;
+  if (useFlat) {
+    const sharpToFlat = { "A#": "Bb", "C#": "Db", "D#": "Eb", "F#": "Gb", "G#": "Ab" };
+    if (sharpToFlat[root]) {
+      root = sharpToFlat[root];
+    }
+  }
   switch (quality) {
     case "major": symbol = root; break;
     case "minor": symbol = root + "m"; break;
@@ -26,16 +39,11 @@ function getChordSymbol(root, quality, useFlat) {
     case "augmented": symbol = root + "+"; break;
     default: symbol = root;
   }
-  if (useFlat) {
-    const sharpToFlat = { "A#": "Bb", "C#": "Db", "D#": "Eb", "F#": "Gb", "G#": "Ab" };
-    if (sharpToFlat[symbol]) {
-      symbol = sharpToFlat[symbol];
-    }
-  }
+  symbol += extensions;
   return symbol;
 }
 
-function generateChords(tonic, scaleType, instrument, customTuning, displayTonic) {
+function generateChords(tonic, scaleType, extensionsArr, instrument, customTuning, displayTonic) {
   let scale = computeScale(tonic, scaleType);
   let qualities = scales[scaleType].chordQualities || [];
   let useFlat = displayTonic.includes("b");
@@ -46,8 +54,9 @@ function generateChords(tonic, scaleType, instrument, customTuning, displayTonic
 
     let chordRoot = scale[i];
     let quality = qualities[i];
-    let chordNotes = computeChordNotes(chordRoot, quality);
-    let chordSymbol = getChordSymbol(chordRoot, quality, useFlat);
+    let extensions = extensionsArr[i];
+    let chordNotes = computeChordNotes(chordRoot, quality, extensions);
+    let chordSymbol = getChordSymbol(chordRoot, quality, extensions, useFlat);
     let fingerings = computeGuitarFingerings(chordNotes, customTuning);
 
     results.push({
