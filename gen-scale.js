@@ -62,4 +62,4 @@ function generateChords(tonic, scaleType, instrument, customTuning, displayTonic
   return results;
 }
 
-export { generateChords };
+export { computeScale, generateChords };

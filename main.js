@@ -1,6 +1,7 @@
 import { notes, tuningPresets, scales } from './constants.js';
 import { renderChordSVG } from './chord-render.js';
-import { generateChords } from './gen-scale.js';
+import { generateChords, computeScale } from './gen-scale.js';
+import { renderScaleStaff } from './scale-render.js';
 
 // ============================
 // Helper Functions
@@ -35,6 +36,9 @@ let isInitialLoad = true;
 
 const instrumentSelect = document.getElementById("instrument");
 const tuningGroup = document.getElementById("tuningGroup");
+const tonicSelect = document.getElementById("tonic");
+const scaleTypeSelect = document.getElementById("scaleType");
+const scaleNotesDiv = document.getElementById("scaleNotes");
 
 function populateTuningPresets(instrument) {
   const tuningPresetSelect = document.getElementById('tuningPreset');
@@ -180,6 +184,18 @@ function generateChordsFromForm() {
   resultsDiv.appendChild(table);
 }
 
+function updateScaleNotes() {
+  const tonic = tonicSelect.value;
+  const scaleType = scaleTypeSelect.value;
+  if (tonic && scaleType) {
+    const scale = computeScale(tonic, scaleType);
+    scaleNotesDiv.innerHTML = renderScaleStaff(scale);
+  }
+}
+
+tonicSelect.addEventListener("change", updateScaleNotes);
+scaleTypeSelect.addEventListener("change", updateScaleNotes);
+
 window.handleInputChange = function() {
   if (!isInitialLoad) {
     document.getElementById('scaleForm').submit();
@@ -191,6 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
   populateSelects();
   populateFormFromQuery();
   generateChordsFromForm();
+  updateScaleNotes();
   isInitialLoad = false;
 });
 
