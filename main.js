@@ -2,6 +2,7 @@ import { notes, tuningPresets, scales } from './constants.js';
 import { renderChordSVG } from './chord-render.js';
 import { generateChords, computeScale } from './gen-scale.js';
 import { renderScaleStaff } from './scale-render.js';
+import { playScale } from './scale-audio.js';
 
 // ============================
 // Helper Functions
@@ -193,6 +194,15 @@ function updateScaleNotes() {
   }
 }
 
+function playScaleFromForm() {
+  const tonic = document.getElementById('tonic').value;
+  const scaleType = document.getElementById('scaleType').value;
+  if (tonic && scaleType) {
+    const scale = computeScale(tonic, scaleType);
+    playScale(scale);
+  }
+}
+
 tonicSelect.addEventListener("change", updateScaleNotes);
 scaleTypeSelect.addEventListener("change", updateScaleNotes);
 
@@ -209,5 +219,9 @@ document.addEventListener('DOMContentLoaded', () => {
   generateChordsFromForm();
   updateScaleNotes();
   isInitialLoad = false;
+  const playScaleBtn = document.getElementById("playScaleBtn");
+  if (playScaleBtn) {
+    playScaleBtn.addEventListener("click", playScaleFromForm);
+  }
 });
 
