@@ -89,6 +89,37 @@ function filterCandidate(candidate, tuning, chordNotes) {
   for (let i = 0; i < nonMutedValues.length - 1; i++) {
     if (nonMutedValues[i] >= nonMutedValues[i + 1]) return false;
   }
+
+  // let's try assigning fingers to the frets and strings.
+  let availableFingers = 4;
+
+  // now remap this into a format where we have all strings by fret
+  let fingeringByFret = [];
+  for (let i = 0; i < candidate.length; i++) {
+    let fret = (candidate[i] === "x") ? null : parseInt(candidate[i]);
+    if (fingeringByFret[fret] === undefined) {
+      fingeringByFret[fret] = [];
+    }
+    fingeringByFret[fret].push(i);
+  }
+
+  let requiresBarInFret = null;
+  // now start with the highest fret and assign fingers to the strings
+  for (let i = fingeringByFret.length - 1; i >= 0; i--) {
+    let strings = fingeringByFret[i];
+    if (strings === undefined) {
+      continue;
+    }
+    if (requiresBarInFret !== null) {
+      return false;
+    }
+    if (strings.length >= availableFingers) {
+      requiresBarInFret = i;
+    } else {
+      availableFingers -= strings.length;
+    }
+  }
+
   return true;
 }
 
