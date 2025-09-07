@@ -1,6 +1,7 @@
-import { notes } from './constants.js';
+import { getNotes } from './constants.js';
 
-function getProducedPitch(tuningObj, fret) {
+async function getProducedPitch(tuningObj, fret) {
+  const notes = await getNotes();
   let baseIndex = notes.indexOf(tuningObj.note);
   let total = baseIndex + fret;
   let producedNote = notes[total % 12];
@@ -8,7 +9,8 @@ function getProducedPitch(tuningObj, fret) {
   return producedNote + (tuningObj.octave + octaveIncrease);
 }
 
-function pitchToValue(pitch) {
+async function pitchToValue(pitch) {
+  const notes = await getNotes();
   let match = pitch.match(/^([A-G]#?)(\d+)$/);
   if (!match) return null;
   let note = match[1];
@@ -17,13 +19,13 @@ function pitchToValue(pitch) {
 }
 
 
-function dfsCandidatesForSpan(chordNotes, tuning, minFret, maxFret, fundamentalFound, currentAssignment) {
+async function dfsCandidatesForSpan(chordNotes, tuning, minFret, maxFret, fundamentalFound, currentAssignment) {
   if (currentAssignment.length === tuning.length) {
     // check that we have all the notes in the chord
     let chordNoteSet = new Set(chordNotes);
-    let producedNotes = currentAssignment.map((assign, i) =>
-      assign === "x" ? null : getProducedPitch(tuning[i], parseInt(assign)).replace(/\d/, "")
-    );
+    let producedNotes = await Promise.all(currentAssignment.map(async (assign, i) =>
+      assign === "x" ? null : (await getProducedPitch(tuning[i], parseInt(assign))).replace(/\d/, "")
+    ));
     let producedNoteSet = new Set(producedNotes);
     for (let note of chordNoteSet) {
       if (!producedNoteSet.has(note)) return [];
@@ -38,7 +40,7 @@ function dfsCandidatesForSpan(chordNotes, tuning, minFret, maxFret, fundamentalF
     possible.push({ fret: 0, produced: openNote });
   }
   for (let fret = minFret; fret <= maxFret; fret++) {
-    let produced = getProducedPitch(tuning[index], fret);
+    let produced = await getProducedPitch(tuning[index], fret);
     let producedNote = produced.replace(/\d/, "");
     if (chordNotes.includes(producedNote)) {
       possible.push({ fret: fret, produced: producedNote });
@@ -55,26 +57,26 @@ function dfsCandidatesForSpan(chordNotes, tuning, minFret, maxFret, fundamentalF
     let newAssignment = currentAssignment.slice();
     if (opt === "x") {
       newAssignment.push("x");
-      let inner = dfsCandidatesForSpan(chordNotes, tuning, minFret, maxFret, fundamentalFound, newAssignment);
+      let inner = await dfsCandidatesForSpan(chordNotes, tuning, minFret, maxFret, fundamentalFound, newAssignment);
       // inner is an array of all candidates, append it to the final result array
       results = results.concat(inner);
     } else {
       newAssignment.push(opt.fret.toString());
-      let inner = dfsCandidatesForSpan(chordNotes, tuning, minFret, maxFret, true, newAssignment);
+      let inner = await dfsCandidatesForSpan(chordNotes, tuning, minFret, maxFret, true, newAssignment);
       results = results.concat(inner);
     }
   }
   return results;
 }
 
-function generateCandidatesForSpan(chordNotes, tuning, minFret, maxFret) {
-  return dfsCandidatesForSpan(chordNotes, tuning, minFret, maxFret, false, []);
+async function generateCandidatesForSpan(chordNotes, tuning, minFret, maxFret) {
+  return await dfsCandidatesForSpan(chordNotes, tuning, minFret, maxFret, false, []);
 }
 
-function filterCandidate(candidate, tuning, chordNotes) {
-  let producedPitches = candidate.map((assign, i) =>
-    assign === "x" ? null : getProducedPitch(tuning[i], parseInt(assign))
-  );
+async function filterCandidate(candidate, tuning, chordNotes) {
+  let producedPitches = await Promise.all(candidate.map(async (assign, i) =>
+    assign === "x" ? null : await getProducedPitch(tuning[i], parseInt(assign))
+  ));
   let firstNonMuted = producedPitches.find(p => p !== null);
   if (!firstNonMuted || firstNonMuted.replace(/\d/, "") !== chordNotes[0]) return false;
   for (let i = tuning.length - 3; i < tuning.length; i++) {
@@ -95,7 +97,7 @@ function filterCandidate(candidate, tuning, chordNotes) {
     }
   }
   let nonMuted = producedPitches.filter(p => p !== null);
-  let nonMutedValues = nonMuted.map(p => pitchToValue(p));
+  let nonMutedValues = await Promise.all(nonMuted.map(async p => await pitchToValue(p)));
   for (let i = 0; i < nonMutedValues.length - 1; i++) {
     if (nonMutedValues[i] >= nonMutedValues[i + 1]) return false;
   }
@@ -133,13 +135,13 @@ function filterCandidate(candidate, tuning, chordNotes) {
   return true;
 }
 
-export function computeGuitarFingerings(chordNotes, tuning) {
+export async function computeGuitarFingerings(chordNotes, tuning) {
   let candidates = new Set();
   for (let maxFret = 3; maxFret <= 15; maxFret++) {
     let minFret = maxFret >= 4 ? maxFret - 3 : 1;
-    let candidateArrays = generateCandidatesForSpan(chordNotes, tuning, minFret, maxFret);
+    let candidateArrays = await generateCandidatesForSpan(chordNotes, tuning, minFret, maxFret);
     for (let cand of candidateArrays) {
-      if (filterCandidate(cand, tuning, chordNotes)) {
+      if (await filterCandidate(cand, tuning, chordNotes)) {
         candidates.add(cand.join(" "));
       }
     }

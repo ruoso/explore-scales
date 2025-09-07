@@ -1,4 +1,4 @@
-import { notes, tuningPresets, scales, formulas } from './constants.js';
+import { getNotes, getTuningPresets, getScales, getFormulas } from './constants.js';
 import { renderChordSVG } from './chord-render.js';
 import { generateChords, computeScale, generateHarmonicSequences } from './gen-scale.js';
 import { renderScaleStaff } from './scale-render.js';
@@ -39,8 +39,9 @@ const extensionIntervals = {
 };
 
 // New function to calculate chord notes including extensions
-function calculateChordNotes(rootIndex, chordType, selectedExtensions) {
-  // Assuming 'formulas' and 'notes' are imported from constants.js
+async function calculateChordNotes(rootIndex, chordType, selectedExtensions) {
+  const notes = await getNotes();
+  const formulas = await getFormulas();
   const baseFormula = formulas[chordType];
   const chordNotes = baseFormula.map(interval => notes[(rootIndex + interval) % notes.length]);
   
@@ -63,7 +64,8 @@ const tonicSelect = document.getElementById("tonic");
 const scaleTypeSelect = document.getElementById("scaleType");
 const scaleNotesDiv = document.getElementById("scaleNotes");
 
-function populateTuningPresets(instrument) {
+async function populateTuningPresets(instrument) {
+  const tuningPresets = await getTuningPresets();
   const tuningPresetSelect = document.getElementById('tuningPreset');
   tuningPresetSelect.innerHTML = "";
   const presets = tuningPresets[instrument];
@@ -96,7 +98,7 @@ function getQueryParams() {
   return params;
 }
 
-function populateFormFromQuery() {
+async function populateFormFromQuery() {
   const params = getQueryParams();
   if (params.tonic) {
     document.getElementById("tonic").value = params.tonic;
@@ -117,7 +119,7 @@ function populateFormFromQuery() {
   }
   // Call populateTuningPresets after the form is fully populated
   if (params.instrument) {
-    populateTuningPresets(params.instrument);
+    await populateTuningPresets(params.instrument);
     if (params.tuningPreset && document.getElementById("tuningPreset")) {
       document.getElementById("tuningPreset").value = params.tuningPreset;
     }
@@ -125,7 +127,9 @@ function populateFormFromQuery() {
 }
 
 // Populate scale type and instrument selects
-function populateSelects() {
+async function populateSelects() {
+  const scales = await getScales();
+  const tuningPresets = await getTuningPresets();
   const scaleTypeSelect = document.getElementById('scaleType');
   const instrumentSelect = document.getElementById('instrument');
   const tuningPresetSelect = document.getElementById('tuningPreset');
@@ -172,7 +176,7 @@ function appendFingeringRow(table, chords, customTuning) {
   }
 }
 
-function generateChordsFromForm() {
+async function generateChordsFromForm() {
   const tonicInput = document.getElementById('tonic').value.trim();
   // Preserve the original tonic for display (e.g., "Bb")
   const displayTonic = tonicInput;
@@ -180,6 +184,7 @@ function generateChordsFromForm() {
   const normalizedTonic = tonicInput.includes("b") ? convertFlatToSharp(tonicInput) : tonicInput;
   const scaleType = document.getElementById('scaleType').value;
   const instrument = document.getElementById('instrument').value;
+  const tuningPresets = await getTuningPresets();
   let customTuning = null;
   if (tuningPresets[instrument]) {
     let presetSelect = document.getElementById("tuningPreset");
@@ -190,6 +195,7 @@ function generateChordsFromForm() {
   }
   const resultsDiv = document.getElementById('results');
   resultsDiv.innerHTML = '';
+  const notes = await getNotes();
   if (!normalizedTonic || (notes.indexOf(normalizedTonic) === -1 && !normalizedTonic.includes("b"))) {
     resultsDiv.innerHTML = '<p>Please enter a valid tonic note (e.g., C, C#, D, Bb, etc.).</p>';
     return;
@@ -202,7 +208,7 @@ function generateChordsFromForm() {
     let ext = document.getElementById(`extensions-${i}`).value;
     extensions.push(ext);
   }
-  let chords = generateChords(normalizedTonic, scaleType, extensions, instrument, customTuning, displayTonic);
+  let chords = await generateChords(normalizedTonic, scaleType, extensions, instrument, customTuning, displayTonic);
   let table = document.createElement('table');
   table.classList.add('scale-table');
   let degreeRow = document.createElement('tr');
@@ -243,12 +249,12 @@ function generateChordsFromForm() {
   resultsDiv.appendChild(table);
   
   // Generate and display harmonic sequences
-  displayHarmonicSequences(normalizedTonic, scaleType, extensions, displayTonic, customTuning);
+  await displayHarmonicSequences(normalizedTonic, scaleType, extensions, displayTonic, customTuning);
 }
 
-function displayHarmonicSequences(tonic, scaleType, extensionsArr, displayTonic, customTuning) {
+async function displayHarmonicSequences(tonic, scaleType, extensionsArr, displayTonic, customTuning) {
   const harmonicSequencesDiv = document.getElementById('harmonicSequences');
-  const sequences = generateHarmonicSequences(tonic, scaleType, extensionsArr, displayTonic, customTuning);
+  const sequences = await generateHarmonicSequences(tonic, scaleType, extensionsArr, displayTonic, customTuning);
   
   // Store globally for fingering navigation
   window.currentSequences = sequences;
@@ -391,18 +397,19 @@ window.cycleFingering = function(sequenceName, chordIndex, direction) {
 };
 
 // Event delegation: update chord notes when an extension checkbox changes
-document.addEventListener('change', function(e) {
+document.addEventListener('change', async function(e) {
   if (e.target.classList.contains('chord-extension')) {
     let container = e.target.closest('.extensions');
     // Get the chord's base root and chord type from data attributes
     const rootNote = container.getAttribute('data-root');
     const chordType = container.getAttribute('data-chord-type');
+    const notes = await getNotes();
     const rootIndex = notes.indexOf(rootNote);
     // Gather checked extension values from this container
     const selectedExtNodes = container.querySelectorAll('.chord-extension:checked');
     const selectedExtensions = Array.from(selectedExtNodes).map(el => el.value);
     // Calculate new chord notes using the updated extensions
-    const newChordNotes = calculateChordNotes(rootIndex, chordType, selectedExtensions);
+    const newChordNotes = await calculateChordNotes(rootIndex, chordType, selectedExtensions);
     // Update the sibling element displaying the chord notes
     const td = container.parentElement;
     let notesDiv = td.querySelector('.updated-notes');
@@ -412,43 +419,48 @@ document.addEventListener('change', function(e) {
   }
 });
 
-function updateScaleNotes() {
+async function updateScaleNotes() {
   const tonic = tonicSelect.value;
   const scaleType = scaleTypeSelect.value;
   if (tonic && scaleType) {
-    const scale = computeScale(tonic, scaleType);
+    const scale = await computeScale(tonic, scaleType);
     scaleNotesDiv.innerHTML = renderScaleStaff(scale);
   }
 }
 
-function playScaleFromForm() {
+async function playScaleFromForm() {
   const tonic = document.getElementById('tonic').value;
   const scaleType = document.getElementById('scaleType').value;
   if (tonic && scaleType) {
-    const scale = computeScale(tonic, scaleType);
+    const scale = await computeScale(tonic, scaleType);
     playScale(scale);
   }
 }
 
-tonicSelect.addEventListener("change", updateScaleNotes);
-scaleTypeSelect.addEventListener("change", updateScaleNotes);
+tonicSelect.addEventListener("change", async () => await updateScaleNotes());
+scaleTypeSelect.addEventListener("change", async () => await updateScaleNotes());
 
-window.handleInputChange = function() {
+window.handleInputChange = async function() {
   if (!isInitialLoad) {
-    document.getElementById('scaleForm').submit();
+    await generateChordsFromForm();
   }
 };
 
 // Call populateSelects on page load
-document.addEventListener('DOMContentLoaded', () => {
-  populateSelects();
-  populateFormFromQuery();
-  generateChordsFromForm();
-  updateScaleNotes();
-  const playScaleBtn = document.getElementById("playScaleBtn");
-  if (playScaleBtn) {
-    playScaleBtn.addEventListener("click", playScaleFromForm);
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    await populateSelects();
+    await populateFormFromQuery();
+    await generateChordsFromForm();
+    await updateScaleNotes();
+    const playScaleBtn = document.getElementById("playScaleBtn");
+    if (playScaleBtn) {
+      playScaleBtn.addEventListener("click", playScaleFromForm);
+    }
+    isInitialLoad = false;
+  } catch (error) {
+    console.error('Error initializing application:', error);
+    document.getElementById('results').innerHTML = '<p>Error loading music data. Please refresh the page.</p>';
   }
-  isInitialLoad = false;
 });
 

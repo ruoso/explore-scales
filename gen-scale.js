@@ -1,7 +1,9 @@
-import { notes, scales, formulas, extensionNames, harmonicSequences } from './constants.js';
+import { getNotes, getScales, getFormulas, getExtensionNames, getHarmonicSequences } from './constants.js';
 import { computeGuitarFingerings } from './fingering.js';
 
-function computeScale(tonic, scaleType) {
+async function computeScale(tonic, scaleType) {
+  const notes = await getNotes();
+  const scales = await getScales();
   let scale = [tonic];
   let currentIndex = notes.indexOf(tonic);
   for (let interval of scales[scaleType].pattern) {
@@ -11,7 +13,10 @@ function computeScale(tonic, scaleType) {
   return scale;
 }
 
-function computeChordNotes(root, quality, extensions) {
+async function computeChordNotes(root, quality, extensions) {
+  const notes = await getNotes();
+  const formulas = await getFormulas();
+  const extensionNames = await getExtensionNames();
   let intervals = [...formulas[quality]];
   let rootIndex = notes.indexOf(root);
   if (extensions) {
@@ -49,8 +54,9 @@ function getChordSymbol(root, quality, extensions, useFlat) {
   return symbol;
 }
 
-function generateChords(tonic, scaleType, extensionsArr, instrument, customTuning, displayTonic) {
-  let scale = computeScale(tonic, scaleType);
+async function generateChords(tonic, scaleType, extensionsArr, instrument, customTuning, displayTonic) {
+  const scales = await getScales();
+  let scale = await computeScale(tonic, scaleType);
   let qualities = scales[scaleType].chordQualities || [];
   let useFlat = displayTonic.includes("b");
   let results = [];
@@ -61,9 +67,9 @@ function generateChords(tonic, scaleType, extensionsArr, instrument, customTunin
     let chordRoot = scale[i];
     let quality = qualities[i];
     let extensions = extensionsArr[i];
-    let chordNotes = computeChordNotes(chordRoot, quality, extensions);
+    let chordNotes = await computeChordNotes(chordRoot, quality, extensions);
     let chordSymbol = getChordSymbol(chordRoot, quality, extensions, useFlat);
-    let fingerings = computeGuitarFingerings(chordNotes, customTuning);
+    let fingerings = await computeGuitarFingerings(chordNotes, customTuning);
 
     results.push({
       degree: scales[scaleType].romanMapping?.[i] || "",
@@ -77,11 +83,13 @@ function generateChords(tonic, scaleType, extensionsArr, instrument, customTunin
   return results;
 }
 
-function generateHarmonicSequences(tonic, scaleType, extensionsArr, displayTonic, customTuning) {
+async function generateHarmonicSequences(tonic, scaleType, extensionsArr, displayTonic, customTuning) {
+  const harmonicSequences = await getHarmonicSequences();
+  const scales = await getScales();
   const sequences = harmonicSequences[scaleType] || [];
   
   // Generate chords with fingerings for harmonic sequences
-  let scale = computeScale(tonic, scaleType);
+  let scale = await computeScale(tonic, scaleType);
   let qualities = scales[scaleType].chordQualities || [];
   let useFlat = displayTonic.includes("b");
   let chords = [];
@@ -92,9 +100,9 @@ function generateHarmonicSequences(tonic, scaleType, extensionsArr, displayTonic
     let chordRoot = scale[i];
     let quality = qualities[i];
     let extensions = extensionsArr[i];
-    let chordNotes = computeChordNotes(chordRoot, quality, extensions);
+    let chordNotes = await computeChordNotes(chordRoot, quality, extensions);
     let chordSymbol = getChordSymbol(chordRoot, quality, extensions, useFlat);
-    let fingerings = customTuning ? computeGuitarFingerings(chordNotes, customTuning) : [];
+    let fingerings = customTuning ? await computeGuitarFingerings(chordNotes, customTuning) : [];
 
     chords.push({
       degree: scales[scaleType].romanMapping?.[i] || "",
