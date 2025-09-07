@@ -320,3 +320,140 @@ export const extensionNames = {
   "°7": 9,       // Diminished 7th
   "+5": 8        // Augmented 5th (for augmented chords)
 };
+
+// Common harmonic sequences for different scale types
+export const harmonicSequences = {
+  major: [
+    {
+      name: "Classic Pop Progression",
+      functional: ["Tonic", "Dominant", "Submediant", "Subdominant"],
+      roman: ["I", "V", "vi", "IV"],
+      indices: [0, 4, 5, 3]
+    },
+    {
+      name: "Circle of Fifths",
+      functional: ["Supertonic", "Dominant", "Tonic"],
+      roman: ["ii", "V", "I"],
+      indices: [1, 4, 0]
+    },
+    {
+      name: "Doo-Wop Changes",
+      functional: ["Tonic", "Submediant", "Supertonic", "Dominant"],
+      roman: ["I", "vi", "ii", "V"],
+      indices: [0, 5, 1, 4]
+    },
+    {
+      name: "Plagal Cadence",
+      functional: ["Subdominant", "Tonic"],
+      roman: ["IV", "I"],
+      indices: [3, 0]
+    }
+  ],
+  naturalMinor: [
+    {
+      name: "Natural Minor Progression",
+      functional: ["Tonic", "Subdominant", "Subtonic", "Mediant"],
+      roman: ["i", "iv", "VII", "III"],
+      indices: [0, 3, 6, 2]
+    },
+    {
+      name: "Minor ii-V-i",
+      functional: ["Supertonic", "Dominant", "Tonic"],
+      roman: ["ii°", "V", "i"],
+      indices: [1, 4, 0]
+    },
+    {
+      name: "Andalusian Cadence",
+      functional: ["Tonic", "Submediant", "Subtonic", "Mediant"],
+      roman: ["i", "VI", "VII", "III"],
+      indices: [0, 5, 6, 2]
+    }
+  ],
+  harmonicMinor: [
+    {
+      name: "Harmonic Minor ii-V-i",
+      functional: ["Supertonic", "Dominant", "Tonic"],
+      roman: ["ii°", "V", "i"],
+      indices: [1, 4, 0]
+    },
+    {
+      name: "Phrygian Dominant",
+      functional: ["Dominant", "Tonic"],
+      roman: ["V", "i"],
+      indices: [4, 0]
+    }
+  ],
+  melodicMinor: [
+    {
+      name: "Melodic Minor ii-V-i",
+      functional: ["Supertonic", "Dominant", "Tonic"],
+      roman: ["ii", "V", "i"],
+      indices: [1, 4, 0]
+    }
+  ],
+  dorian: [
+    {
+      name: "Dorian i-IV",
+      functional: ["Tonic", "Subdominant"],
+      roman: ["i", "IV"],
+      indices: [0, 3]
+    },
+    {
+      name: "Dorian ii-v-i",
+      functional: ["Supertonic", "Dominant", "Tonic"],
+      roman: ["ii", "v", "i"],
+      indices: [1, 4, 0]
+    }
+  ],
+  mixolydian: [
+    {
+      name: "Mixolydian I-VII",
+      functional: ["Tonic", "Subtonic"],
+      roman: ["I", "VII"],
+      indices: [0, 6]
+    },
+    {
+      name: "Blues Dominant",
+      functional: ["Tonic", "Subdominant", "Tonic", "Subtonic"],
+      roman: ["I", "IV", "I", "VII"],
+      indices: [0, 3, 0, 6]
+    }
+  ],
+  // Chorinho sequences
+  chorinhoMajor: [
+    {
+      name: "🎼 Chorinho Turnaround",
+      functional: ["Tonic", "Submediant", "Supertonic", "Dominant"],
+      roman: ["I", "vi", "ii", "V"],
+      indices: [0, 5, 1, 4]
+    },
+    {
+      name: "🎼 Chorinho Circle",
+      functional: ["Mediant", "Submediant", "Supertonic", "Dominant"],
+      roman: ["iii°", "vi", "ii", "V"],
+      indices: [2, 5, 1, 4]
+    }
+  ],
+  chorinhoHarmonic: [
+    {
+      name: "🎼 Chorinho Minor ii-V-i",
+      functional: ["Supertonic", "Dominant", "Tonic"],
+      roman: ["ii°", "V", "i"],
+      indices: [1, 4, 0]
+    },
+    {
+      name: "🎼 Chorinho Augmented",
+      functional: ["Tonic", "Mediant", "Dominant"],
+      roman: ["i", "III+", "V"],
+      indices: [0, 2, 4]
+    }
+  ],
+  chorinhoDiminished: [
+    {
+      name: "🎼 Diminished Cycle",
+      functional: ["Tonic", "Mediant", "Dominant", "Submediant"],
+      roman: ["i°", "iii°", "v°", "vi°"],
+      indices: [0, 2, 4, 5]
+    }
+  ]
+};

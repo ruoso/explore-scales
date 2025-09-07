@@ -68,3 +68,65 @@ button.submit-btn:hover {
   font-size: 0.9em;
   color: #333;
 }
+
+/* Harmonic Sequences Styling */
+.harmonic-sequences {
+  margin-top: 30px;
+}
+
+.harmonic-sequences h2 {
+  color: #333;
+  border-bottom: 2px solid #007BFF;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+.sequence-container {
+  background: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.sequence-container h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #555;
+  font-size: 1.1em;
+}
+
+.sequence-table-container {
+  overflow-x: auto;
+}
+
+.sequence-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0;
+  font-size: 0.9em;
+}
+
+.sequence-table td {
+  border: 1px solid #ddd;
+  padding: 8px 12px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.sequence-table .sequence-header td {
+  background: #e8f4f8;
+  font-weight: bold;
+}
+
+.sequence-table .sequence-header td:first-child {
+  background: #d1ecf1;
+  text-align: left;
+  font-weight: bold;
+  width: 120px;
+}
+
+.sequence-table .chord-notes {
+  font-size: 0.85em;
+  color: #666;
+}

@@ -1,4 +1,4 @@
-import { notes, scales, formulas, extensionNames } from './constants.js';
+import { notes, scales, formulas, extensionNames, harmonicSequences } from './constants.js';
 import { computeGuitarFingerings } from './fingering.js';
 
 function computeScale(tonic, scaleType) {
@@ -77,4 +77,50 @@ function generateChords(tonic, scaleType, extensionsArr, instrument, customTunin
   return results;
 }
 
-export { computeScale, generateChords };
+function generateHarmonicSequences(tonic, scaleType, extensionsArr, displayTonic) {
+  const sequences = harmonicSequences[scaleType] || [];
+  
+  // Generate chords without fingerings for harmonic sequences
+  let scale = computeScale(tonic, scaleType);
+  let qualities = scales[scaleType].chordQualities || [];
+  let useFlat = displayTonic.includes("b");
+  let chords = [];
+
+  for (let i = 0; i < scale.length; i++) {
+    if (i >= qualities.length) break;
+    
+    let chordRoot = scale[i];
+    let quality = qualities[i];
+    let extensions = extensionsArr[i];
+    let chordNotes = computeChordNotes(chordRoot, quality, extensions);
+    let chordSymbol = getChordSymbol(chordRoot, quality, extensions, useFlat);
+
+    chords.push({
+      degree: scales[scaleType].romanMapping?.[i] || "",
+      functionLabel: scales[scaleType].functionsMapping?.[i] || "",
+      chordSymbol: chordSymbol,
+      chordNotes: chordNotes
+    });
+  }
+  
+  return sequences.map(sequence => {
+    const sequenceChords = sequence.indices.map((index, i) => {
+      if (index < chords.length) {
+        return {
+          functional: sequence.functional[i],
+          roman: sequence.roman[i],
+          chordSymbol: chords[index].chordSymbol,
+          chordNotes: chords[index].chordNotes
+        };
+      }
+      return null;
+    }).filter(chord => chord !== null);
+
+    return {
+      name: sequence.name,
+      chords: sequenceChords
+    };
+  });
+}
+
+export { computeScale, generateChords, generateHarmonicSequences };

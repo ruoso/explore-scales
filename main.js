@@ -1,6 +1,6 @@
 import { notes, tuningPresets, scales, formulas } from './constants.js';
 import { renderChordSVG } from './chord-render.js';
-import { generateChords, computeScale } from './gen-scale.js';
+import { generateChords, computeScale, generateHarmonicSequences } from './gen-scale.js';
 import { renderScaleStaff } from './scale-render.js';
 import { playScale } from './scale-audio.js';
 
@@ -241,6 +241,68 @@ function generateChordsFromForm() {
 
   appendFingeringRow(table, chords, customTuning);
   resultsDiv.appendChild(table);
+  
+  // Generate and display harmonic sequences
+  displayHarmonicSequences(normalizedTonic, scaleType, extensions, displayTonic);
+}
+
+function displayHarmonicSequences(tonic, scaleType, extensionsArr, displayTonic) {
+  const harmonicSequencesDiv = document.getElementById('harmonicSequences');
+  const sequences = generateHarmonicSequences(tonic, scaleType, extensionsArr, displayTonic);
+  
+  console.log('Debug - scaleType:', scaleType);
+  console.log('Debug - sequences generated:', sequences);
+  
+  if (sequences.length === 0) {
+    harmonicSequencesDiv.innerHTML = '<p>No harmonic sequences available for this scale type.</p>';
+    return;
+  }
+  
+  let html = '<h2>Common Harmonic Sequences</h2>';
+  
+  sequences.forEach(sequence => {
+    html += `<div class="sequence-container">
+      <h3>${sequence.name}</h3>
+      <div class="sequence-table-container">
+        <table class="sequence-table">
+          <tr class="sequence-header">
+            <td><strong>Functional</strong></td>`;
+    
+    sequence.chords.forEach(chord => {
+      html += `<td>${chord.functional}</td>`;
+    });
+    
+    html += `</tr>
+          <tr class="sequence-header">
+            <td><strong>Roman Numeral</strong></td>`;
+    
+    sequence.chords.forEach(chord => {
+      html += `<td>${chord.roman}</td>`;
+    });
+    
+    html += `</tr>
+          <tr class="sequence-header">
+            <td><strong>Chord Symbol</strong></td>`;
+    
+    sequence.chords.forEach(chord => {
+      html += `<td><strong>${chord.chordSymbol}</strong></td>`;
+    });
+    
+    html += `</tr>
+          <tr>
+            <td><strong>Notes</strong></td>`;
+    
+    sequence.chords.forEach(chord => {
+      html += `<td class="chord-notes">${chord.chordNotes.join(', ')}</td>`;
+    });
+    
+    html += `</tr>
+        </table>
+      </div>
+    </div>`;
+  });
+  
+  harmonicSequencesDiv.innerHTML = html;
 }
 
 // Event delegation: update chord notes when an extension checkbox changes
