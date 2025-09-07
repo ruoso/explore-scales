@@ -8,11 +8,11 @@
       { "name": "Open G", "tuning": "D2, G2, D3, G3, B3, D4" },
       { "name": "Open D", "tuning": "D2, A2, D3, F#3, A3, D4" },
       { "name": "DADGAD", "tuning": "D2, A2, D3, G3, A3, D4" },
-      { "name": "Open C", "tuning": "C2, G2, C3, G3, E3, G3" }
+      { "name": "Open C", "tuning": "C2, G2, C3, G3, C4, E4" }
     ],
     "7guitar": [
       { "name": "Standard", "tuning": "B1, E2, A2, D3, G3, B3, E4" },
-      { "name": "Brazilian", "tuning": "C1, E2, A2, D3, G3, B3, E4" }
+      { "name": "Brazilian", "tuning": "C2, E2, A2, D3, G3, B3, E4" }
     ],
     "4bass": [
       { "name": "Standard", "tuning": "E1, A1, D2, G2" }
@@ -34,6 +34,9 @@
     ],
     "mandolin": [
       { "name": "Standard", "tuning": "G3, D4, A4, E5" }
+    ],
+    "cavaquinho": [
+      { "name": "Standard (Brazil)", "tuning": "D4, G4, B4, D5" } // new
     ]
   },
 
@@ -104,9 +107,9 @@
     "lydian": {
       "name": "Lydian",
       "pattern": [2, 2, 2, 1, 2, 2, 1],
-      "chordQualities": ["major", "major", "minor", "diminished", "major", "minor", "minor"],
-      "romanMapping": ["I", "II", "iii", "IV+", "V", "vi", "vii"],
-      "functionsMapping": ["Tonic", "Supertonic", "Mediant", "Augmented Fourth", "Dominant", "Submediant", "Leading Tone"]
+      "chordQualities": ["major","major","minor","diminished","major","minor","minor"],
+      "romanMapping": ["I","II","iii","iv°","V","vi","vii"],
+      "functionsMapping": ["Tonic","Supertonic","Mediant","Subdominant","Dominant","Submediant","Leading Tone"]
     },
     "mixolydian": {
       "name": "Mixolydian",
