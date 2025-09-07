@@ -1,4 +1,13 @@
 import { getNotes } from './constants.js';
+import { LRUCache } from './cache-utils.js';
+
+// Caching system for fingerings (cache up to 200 chord/tuning combinations)
+const fingeringCache = new LRUCache(200);
+const cacheKeyGenerator = (chordNotes, tuning) => {
+  const tuningKey = tuning.map(t => `${t.note}${t.octave}`).join('|');
+  const notesKey = chordNotes.sort().join('|');
+  return `${notesKey}:${tuningKey}`;
+};
 
 async function getProducedPitch(tuningObj, fret) {
   const notes = await getNotes();
@@ -136,15 +145,88 @@ async function filterCandidate(candidate, tuning, chordNotes) {
 }
 
 export async function computeGuitarFingerings(chordNotes, tuning) {
+  if (!tuning || chordNotes.length === 0) {
+    return [];
+  }
+  
+  // Check cache first
+  const cacheKey = cacheKeyGenerator(chordNotes, tuning);
+  if (fingeringCache.has(cacheKey)) {
+    return fingeringCache.get(cacheKey);
+  }
+  
   let candidates = new Set();
-  for (let maxFret = 3; maxFret <= 15; maxFret++) {
+  
+  // Parallelize fret span computations
+  const spanPromises = [];
+  for (let maxFret = 3; maxFret <= 12; maxFret++) { // Reduced from 15 to 12 for performance
     let minFret = maxFret >= 4 ? maxFret - 3 : 1;
-    let candidateArrays = await generateCandidatesForSpan(chordNotes, tuning, minFret, maxFret);
-    for (let cand of candidateArrays) {
-      if (await filterCandidate(cand, tuning, chordNotes)) {
-        candidates.add(cand.join(" "));
+    spanPromises.push((async () => {
+      const candidateArrays = await generateCandidatesForSpan(chordNotes, tuning, minFret, maxFret);
+      const validCandidates = [];
+      
+      // Filter candidates for this span
+      for (let cand of candidateArrays) {
+        if (await filterCandidate(cand, tuning, chordNotes)) {
+          validCandidates.push(cand.join(" "));
+        }
       }
+      return validCandidates;
+    })());
+  }
+  
+  // Wait for all spans to complete and collect results
+  const spanResults = await Promise.all(spanPromises);
+  
+  // Add all valid candidates to the set
+  for (const spanCandidates of spanResults) {
+    for (const candidate of spanCandidates) {
+      candidates.add(candidate);
     }
   }
-  return Array.from(candidates);
+  
+  // Limit results to prevent UI slowdown - take first 10 fingerings
+  const result = Array.from(candidates).slice(0, 10);
+  
+  // Cache the result
+  fingeringCache.set(cacheKey, result);
+  
+  return result;
+}
+
+// Cache prewarming for common chords
+export async function prewarmFingeringCache() {
+  const commonChords = [
+    ['C', 'E', 'G'],      // C major
+    ['D', 'F#', 'A'],     // D major  
+    ['E', 'G#', 'B'],     // E major
+    ['F', 'A', 'C'],      // F major
+    ['G', 'B', 'D'],      // G major
+    ['A', 'C#', 'E'],     // A major
+    ['B', 'D#', 'F#'],    // B major
+    ['C', 'Eb', 'G'],     // C minor
+    ['D', 'F', 'A'],      // D minor
+    ['E', 'G', 'B'],      // E minor
+    ['F', 'Ab', 'C'],     // F minor
+    ['G', 'Bb', 'D'],     // G minor
+    ['A', 'C', 'E'],      // A minor
+    ['B', 'D', 'F#']      // B minor
+  ];
+
+  const commonTuning = [
+    { note: 'E', octave: 2 },
+    { note: 'A', octave: 2 },
+    { note: 'D', octave: 3 },
+    { note: 'G', octave: 3 },
+    { note: 'B', octave: 3 },
+    { note: 'E', octave: 4 }
+  ];
+
+  console.log('Prewarming fingering cache...');
+  const warmupPromises = commonChords.map(chord => 
+    computeGuitarFingerings(chord, commonTuning)
+  );
+  
+  await Promise.all(warmupPromises);
+  console.log(`Fingering cache prewarmed with ${fingeringCache.size()} entries`);
 }

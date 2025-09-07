@@ -75,24 +75,35 @@ async function generateChords(tonic, scaleType, extensionsArr, instrument, custo
   let useFlat = displayTonic.includes("b");
   let results = [];
 
+  // Parallelize chord generation
+  const chordPromises = [];
   for (let i = 0; i < scale.length; i++) {
     if (i >= qualities.length) break;  // Avoid accessing undefined chord qualities
 
-    let chordRoot = scale[i];
-    let quality = qualities[i];
-    let extensions = extensionsArr[i];
-    let chordNotes = await computeChordNotes(chordRoot, quality, extensions);
-    let chordSymbol = getChordSymbol(chordRoot, quality, extensions, useFlat);
-    let fingerings = await computeGuitarFingerings(chordNotes, customTuning);
+    chordPromises.push((async () => {
+      let chordRoot = scale[i];
+      let quality = qualities[i];
+      let extensions = extensionsArr[i];
+      let chordNotes = await computeChordNotes(chordRoot, quality, extensions);
+      let chordSymbol = getChordSymbol(chordRoot, quality, extensions, useFlat);
+      let fingerings = customTuning ? await computeGuitarFingerings(chordNotes, customTuning) : [];
 
-    results.push({
-      degree: scales[scaleType].romanMapping?.[i] || "",
-      functionLabel: scales[scaleType].functionsMapping?.[i] || "",
-      chordSymbol: chordSymbol,
-      chordNotes: chordNotes,
-      fingerings: fingerings
-    });
+      return {
+        degree: scales[scaleType].romanMapping?.[i] || "",
+        functionLabel: scales[scaleType].functionsMapping?.[i] || "",
+        chordSymbol: chordSymbol,
+        chordNotes: chordNotes,
+        fingerings: fingerings,
+        index: i // Keep track of original position
+      };
+    })());
   }
+  
+  // Wait for all chord generations to complete
+  const chordResults = await Promise.all(chordPromises);
+  
+  // Sort results back to original order and add to results array
+  results = chordResults.sort((a, b) => a.index - b.index).map(({index, ...chord}) => chord);
 
   return results;
 }
@@ -122,24 +133,35 @@ async function generateHarmonicSequences(tonic, scaleType, extensionsArr, displa
   let useFlat = displayTonic.includes("b");
   let chords = [];
 
+  // Parallelize harmonic sequence chord generation  
+  const harmonicChordPromises = [];
   for (let i = 0; i < scale.length; i++) {
     if (i >= qualities.length) break;
     
-    let chordRoot = scale[i];
-    let quality = qualities[i];
-    let extensions = extensionsArr[i];
-    let chordNotes = await computeChordNotes(chordRoot, quality, extensions);
-    let chordSymbol = getChordSymbol(chordRoot, quality, extensions, useFlat);
-    let fingerings = customTuning ? await computeGuitarFingerings(chordNotes, customTuning) : [];
+    harmonicChordPromises.push((async () => {
+      let chordRoot = scale[i];
+      let quality = qualities[i];
+      let extensions = extensionsArr[i];
+      let chordNotes = await computeChordNotes(chordRoot, quality, extensions);
+      let chordSymbol = getChordSymbol(chordRoot, quality, extensions, useFlat);
+      let fingerings = customTuning ? await computeGuitarFingerings(chordNotes, customTuning) : [];
 
-    chords.push({
-      degree: scales[scaleType].romanMapping?.[i] || "",
-      functionLabel: scales[scaleType].functionsMapping?.[i] || "",
-      chordSymbol: chordSymbol,
-      chordNotes: chordNotes,
-      fingerings: fingerings
-    });
+      return {
+        degree: scales[scaleType].romanMapping?.[i] || "",
+        functionLabel: scales[scaleType].functionsMapping?.[i] || "",
+        chordSymbol: chordSymbol,
+        chordNotes: chordNotes,
+        fingerings: fingerings,
+        index: i
+      };
+    })());
   }
+  
+  // Wait for all harmonic chord generations to complete
+  const harmonicChordResults = await Promise.all(harmonicChordPromises);
+  
+  // Sort results back to original order
+  chords = harmonicChordResults.sort((a, b) => a.index - b.index).map(({index, ...chord}) => chord);
   
   return sequences.map(sequence => {
     const sequenceChords = sequence.indices.map((index, i) => {

@@ -1,6 +1,19 @@
 import { notes } from './constants.js';
+import { LRUCache } from './cache-utils.js';
+
+// SVG rendering cache (cache up to 500 SVG renderings)
+const svgCache = new LRUCache(500);
+const svgCacheKeyGenerator = (candidateStr, tuning) => {
+  const tuningKey = tuning.map(t => `${t.note}${t.octave}`).join('|');
+  return `${candidateStr}:${tuningKey}`;
+};
 
 function renderChordSVG(candidateStr, tuning) {
+  // Check cache first
+  const cacheKey = svgCacheKeyGenerator(candidateStr, tuning);
+  if (svgCache.has(cacheKey)) {
+    return svgCache.get(cacheKey);
+  }
   let candidate = candidateStr.split(" ");
   let numStrings = tuning.length;
   let pressed = candidate.filter(val => val !== "x" && val !== "0").map(val => parseInt(val));
@@ -50,6 +63,10 @@ function renderChordSVG(candidateStr, tuning) {
     svg += `<text x="5" y="${marginTop + fretSpacing/2}" font-size="12" fill="black">${displayStartFret}</text>`;
   }
   svg += `</svg>`;
+  
+  // Cache the result
+  svgCache.set(cacheKey, svg);
+  
   return svg;
 }
 

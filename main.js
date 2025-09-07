@@ -1,6 +1,7 @@
 import { getNotes, getTuningPresets, getScales, getFormulas, getGenres } from './constants.js';
 import { renderChordSVG } from './chord-render.js';
 import { generateChords, computeScale, generateHarmonicSequences } from './gen-scale.js';
+import { prewarmFingeringCache } from './fingering.js';
 import { renderScaleStaff } from './scale-render.js';
 import { playScale } from './scale-audio.js';
 
@@ -296,9 +297,12 @@ async function generateChordsFromForm() {
   appendFingeringRow(table, chords, customTuning);
   resultsDiv.appendChild(table);
   
-  // Generate and display harmonic sequences
+  // Generate and display harmonic sequences in parallel with chord generation
   const selectedGenre = document.getElementById('genre').value;
-  await displayHarmonicSequences(normalizedTonic, scaleType, extensions, displayTonic, customTuning, selectedGenre);
+  const harmonicSequencesPromise = displayHarmonicSequences(normalizedTonic, scaleType, extensions, displayTonic, customTuning, selectedGenre);
+  
+  // Wait for harmonic sequences to complete
+  await harmonicSequencesPromise;
 }
 
 async function displayHarmonicSequences(tonic, scaleType, extensionsArr, displayTonic, customTuning, selectedGenre) {
@@ -494,10 +498,18 @@ scaleTypeSelect.addEventListener("change", async () => await updateScaleNotes())
 // Call populateSelects on page load
 document.addEventListener('DOMContentLoaded', async () => {
   try {
-    await populateSelects();
-    await populateFormFromQuery();
+    // Parallelize initial setup
+    const [, ,] = await Promise.all([
+      populateSelects(),
+      populateFormFromQuery(),
+      updateScaleNotes()
+    ]);
+    
+    // Prewarm the fingering cache for better performance
+    prewarmFingeringCache(); // Run in background, don't wait
+    
+    // Generate chords after setup is complete
     await generateChordsFromForm();
-    await updateScaleNotes();
     const playScaleBtn = document.getElementById("playScaleBtn");
     if (playScaleBtn) {
       playScaleBtn.addEventListener("click", playScaleFromForm);

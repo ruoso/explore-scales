@@ -1,18 +1,25 @@
 // Load music data from JSON file
 let musicData = null;
+let musicDataPromise = null;
 
 // Function to load music data
 async function loadMusicData() {
   if (musicData) return musicData;
+  if (musicDataPromise) return musicDataPromise;
   
-  try {
-    const response = await fetch('./music-data.json');
-    musicData = await response.json();
-    return musicData;
-  } catch (error) {
-    console.error('Error loading music data:', error);
-    throw error;
-  }
+  musicDataPromise = (async () => {
+    try {
+      const response = await fetch('./music-data.json');
+      musicData = await response.json();
+      return musicData;
+    } catch (error) {
+      console.error('Error loading music data:', error);
+      musicDataPromise = null; // Reset promise on error so we can retry
+      throw error;
+    }
+  })();
+  
+  return musicDataPromise;
 }
 
 // Export function to get data
