@@ -243,12 +243,16 @@ function generateChordsFromForm() {
   resultsDiv.appendChild(table);
   
   // Generate and display harmonic sequences
-  displayHarmonicSequences(normalizedTonic, scaleType, extensions, displayTonic);
+  displayHarmonicSequences(normalizedTonic, scaleType, extensions, displayTonic, customTuning);
 }
 
-function displayHarmonicSequences(tonic, scaleType, extensionsArr, displayTonic) {
+function displayHarmonicSequences(tonic, scaleType, extensionsArr, displayTonic, customTuning) {
   const harmonicSequencesDiv = document.getElementById('harmonicSequences');
-  const sequences = generateHarmonicSequences(tonic, scaleType, extensionsArr, displayTonic);
+  const sequences = generateHarmonicSequences(tonic, scaleType, extensionsArr, displayTonic, customTuning);
+  
+  // Store globally for fingering navigation
+  window.currentSequences = sequences;
+  window.currentCustomTuning = customTuning;
   
   console.log('Debug - scaleType:', scaleType);
   console.log('Debug - sequences generated:', sequences);
@@ -317,6 +321,35 @@ function displayHarmonicSequences(tonic, scaleType, extensionsArr, displayTonic)
       html += `</td></tr>`;
     }
     
+    // Add fingerings row if tuning is available
+    if (customTuning && sequence.chords.some(chord => chord.fingerings && chord.fingerings.length > 0)) {
+      html += `<tr class="sequence-header">
+            <td><strong>Fingerings</strong></td>`;
+      
+      sequence.chords.forEach((chord, chordIndex) => {
+        html += `<td class="fingering-cell" data-sequence="${sequence.name}" data-chord="${chordIndex}">`;
+        
+        if (chord.fingerings && chord.fingerings.length > 0) {
+          html += `<div class="fingering-container">
+            <div class="fingering-nav">
+              <button class="fingering-btn prev" onclick="cycleFingering('${sequence.name}', ${chordIndex}, -1)" ${chord.fingerings.length <= 1 ? 'disabled' : ''}>‹</button>
+              <span class="fingering-counter">1/${chord.fingerings.length}</span>
+              <button class="fingering-btn next" onclick="cycleFingering('${sequence.name}', ${chordIndex}, 1)" ${chord.fingerings.length <= 1 ? 'disabled' : ''}>›</button>
+            </div>
+            <div class="fingering-display">
+              ${renderChordSVG(chord.fingerings[0], customTuning)}
+            </div>
+          </div>`;
+        } else {
+          html += `<div class="no-fingering">No fingerings available</div>`;
+        }
+        
+        html += `</td>`;
+      });
+      
+      html += `</tr>`;
+    }
+    
     html += `</table>
       </div>
     </div>`;
@@ -324,6 +357,38 @@ function displayHarmonicSequences(tonic, scaleType, extensionsArr, displayTonic)
   
   harmonicSequencesDiv.innerHTML = html;
 }
+
+// Global function to cycle through fingerings
+window.cycleFingering = function(sequenceName, chordIndex, direction) {
+  const cell = document.querySelector(`[data-sequence="${sequenceName}"][data-chord="${chordIndex}"]`);
+  if (!cell) return;
+  
+  const display = cell.querySelector('.fingering-display');
+  const counter = cell.querySelector('.fingering-counter');
+  
+  // Get current fingering index from counter
+  let currentIndex = parseInt(counter.textContent.split('/')[0]) - 1;
+  let totalFingerings = parseInt(counter.textContent.split('/')[1]);
+  
+  // Calculate new index
+  currentIndex += direction;
+  if (currentIndex < 0) currentIndex = totalFingerings - 1;
+  if (currentIndex >= totalFingerings) currentIndex = 0;
+  
+  // Update counter
+  counter.textContent = `${currentIndex + 1}/${totalFingerings}`;
+  
+  // Get the chord data to render new fingering
+  const sequences = window.currentSequences || [];
+  const sequence = sequences.find(s => s.name === sequenceName);
+  if (sequence && sequence.chords[chordIndex] && sequence.chords[chordIndex].fingerings) {
+    const newFingering = sequence.chords[chordIndex].fingerings[currentIndex];
+    const customTuning = window.currentCustomTuning;
+    if (newFingering && customTuning) {
+      display.innerHTML = renderChordSVG(newFingering, customTuning);
+    }
+  }
+};
 
 // Event delegation: update chord notes when an extension checkbox changes
 document.addEventListener('change', function(e) {

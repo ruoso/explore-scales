@@ -77,10 +77,10 @@ function generateChords(tonic, scaleType, extensionsArr, instrument, customTunin
   return results;
 }
 
-function generateHarmonicSequences(tonic, scaleType, extensionsArr, displayTonic) {
+function generateHarmonicSequences(tonic, scaleType, extensionsArr, displayTonic, customTuning) {
   const sequences = harmonicSequences[scaleType] || [];
   
-  // Generate chords without fingerings for harmonic sequences
+  // Generate chords with fingerings for harmonic sequences
   let scale = computeScale(tonic, scaleType);
   let qualities = scales[scaleType].chordQualities || [];
   let useFlat = displayTonic.includes("b");
@@ -94,12 +94,14 @@ function generateHarmonicSequences(tonic, scaleType, extensionsArr, displayTonic
     let extensions = extensionsArr[i];
     let chordNotes = computeChordNotes(chordRoot, quality, extensions);
     let chordSymbol = getChordSymbol(chordRoot, quality, extensions, useFlat);
+    let fingerings = customTuning ? computeGuitarFingerings(chordNotes, customTuning) : [];
 
     chords.push({
       degree: scales[scaleType].romanMapping?.[i] || "",
       functionLabel: scales[scaleType].functionsMapping?.[i] || "",
       chordSymbol: chordSymbol,
-      chordNotes: chordNotes
+      chordNotes: chordNotes,
+      fingerings: fingerings
     });
   }
   
@@ -110,7 +112,8 @@ function generateHarmonicSequences(tonic, scaleType, extensionsArr, displayTonic
           functional: sequence.functional[i],
           roman: sequence.roman[i],
           chordSymbol: chords[index].chordSymbol,
-          chordNotes: chords[index].chordNotes
+          chordNotes: chords[index].chordNotes,
+          fingerings: chords[index].fingerings
         };
       }
       return null;
