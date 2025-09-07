@@ -12,13 +12,19 @@ function computeScale(tonic, scaleType) {
 }
 
 function computeChordNotes(root, quality, extensions) {
-  let intervals = formulas[quality];
+  let intervals = [...formulas[quality]];
   let rootIndex = notes.indexOf(root);
   if (extensions) {
-    // break the extension string where it is a number followed by non-numbers, and there
-    // can be multiple of them, such as 7M9
-    for (let ext of extensions.match(/(\d+\D*)/g)) {
-      intervals.push(extensionNames[ext]);
+    // Handle both single extensions and compound extensions like 7M9, 6/9
+    let extMatches = extensions.match(/(\d+[^\d]*)/g) || [];
+    for (let ext of extMatches) {
+      let extValue = extensionNames[ext];
+      if (Array.isArray(extValue)) {
+        // Handle compound extensions like 6/9, 7M9
+        intervals = intervals.concat(extValue);
+      } else if (extValue !== undefined) {
+        intervals.push(extValue);
+      }
     }
   }
   return intervals.map(interval => notes[(rootIndex + interval) % 12]);

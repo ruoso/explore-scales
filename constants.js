@@ -235,6 +235,49 @@ export const scales = {
     chordQualities: ["major", "minor", "diminished", "minor", "minor", "major", "major"],
     romanMapping: ["I", "ii", "iii", "IV", "v", "VI", "VII"],
     functionsMapping: ["Tonic", "Supertonic", "Mediant", "Subdominant", "Dominant", "Submediant", "Leading Tone"]
+  },
+  // Chorinho scales 🎼
+  chorinhoMajor: {
+    name: "🎼 Chorinho Major",
+    pattern: [2, 2, 1, 2, 2, 2, 1],
+    chordQualities: ["major", "minor", "diminished", "major", "major", "minor", "diminished"],
+    romanMapping: ["I", "ii", "iii°", "IV", "V", "vi", "vii°"],
+    functionsMapping: ["Tonic", "Supertonic", "Mediant", "Subdominant", "Dominant", "Submediant", "Leading Tone"]
+  },
+  chorinhoHarmonic: {
+    name: "🎼 Chorinho Harmonic Minor",
+    pattern: [2, 1, 2, 2, 1, 3, 1],
+    chordQualities: ["minor", "diminished", "augmented", "minor", "major", "major", "diminished"],
+    romanMapping: ["i", "ii°", "III+", "iv", "V", "VI", "vii°"],
+    functionsMapping: ["Tonic", "Supertonic", "Mediant", "Subdominant", "Dominant", "Submediant", "Leading Tone"]
+  },
+  chorinhoMelodic: {
+    name: "🎼 Chorinho Melodic Minor",
+    pattern: [2, 1, 2, 2, 2, 2, 1],
+    chordQualities: ["minor", "minor", "augmented", "major", "major", "diminished", "diminished"],
+    romanMapping: ["i", "ii", "III+", "IV", "V", "vi°", "vii°"],
+    functionsMapping: ["Tonic", "Supertonic", "Mediant", "Subdominant", "Dominant", "Submediant", "Leading Tone"]
+  },
+  chorinhoDiminished: {
+    name: "🎼 Chorinho Diminished",
+    pattern: [2, 1, 2, 1, 2, 1, 2, 1],
+    chordQualities: ["diminished", "diminished", "diminished", "diminished", "diminished", "diminished", "diminished", "diminished"],
+    romanMapping: ["i°", "ii°", "iii°", "iv°", "v°", "vi°", "vii°", "viii°"],
+    functionsMapping: ["Tonic", "Supertonic", "Mediant", "Subdominant", "Dominant", "Submediant", "Leading Tone", "Octave"]
+  },
+  chorinhoGypsy: {
+    name: "🎼 Chorinho Gypsy",
+    pattern: [2, 1, 3, 1, 1, 2, 2],
+    chordQualities: ["minor", "diminished", "augmented", "major", "major", "minor", "minor"],
+    romanMapping: ["i", "ii°", "III+", "IV", "V", "vi", "vii"],
+    functionsMapping: ["Tonic", "Supertonic", "Mediant", "Subdominant", "Dominant", "Submediant", "Leading Tone"]
+  },
+  chorinhoBrazilian: {
+    name: "🎼 Chorinho Brazilian",
+    pattern: [2, 1, 3, 1, 2, 1, 2],
+    chordQualities: ["major", "diminished", "augmented", "minor", "major", "diminished", "major"],
+    romanMapping: ["I", "ii°", "III+", "iv", "V", "vi°", "VII"],
+    functionsMapping: ["Tonic", "Supertonic", "Mediant", "Subdominant", "Dominant", "Submediant", "Subtonic"]
   }
 };
 
@@ -265,5 +308,15 @@ export const extensionNames = {
   "11°": 16,
   "13": 21,
   "13+": 22,
-  "13°": 20
+  "13°": 20,
+  // Chorinho-specific extensions 🎼
+  "7M": 11,      // Major 7th (common in chorinho)
+  "7m": 10,      // Minor 7th
+  "9M": 14,      // Major 9th
+  "9m": 13,      // Minor 9th
+  "6/9": [9, 14], // 6th with added 9th (very common)
+  "7M9": [11, 14], // Major 7th with 9th
+  "7m9": [10, 14], // Minor 7th with 9th
+  "°7": 9,       // Diminished 7th
+  "+5": 8        // Augmented 5th (for augmented chords)
 };
