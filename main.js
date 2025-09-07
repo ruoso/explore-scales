@@ -1,4 +1,4 @@
-import { getNotes, getTuningPresets, getScales, getFormulas } from './constants.js';
+import { getNotes, getTuningPresets, getScales, getFormulas, getGenres } from './constants.js';
 import { renderChordSVG } from './chord-render.js';
 import { generateChords, computeScale, generateHarmonicSequences } from './gen-scale.js';
 import { renderScaleStaff } from './scale-render.js';
@@ -103,6 +103,10 @@ async function populateFormFromQuery() {
   if (params.tonic) {
     document.getElementById("tonic").value = params.tonic;
   }
+  if (params.genre) {
+    document.getElementById("genre").value = params.genre;
+    await populateScalesForGenre(params.genre);
+  }
   if (params.scaleType) {
     document.getElementById("scaleType").value = params.scaleType;
   }
@@ -126,21 +130,25 @@ async function populateFormFromQuery() {
   }
 }
 
-// Populate scale type and instrument selects
+// Populate genre, scale type and instrument selects
 async function populateSelects() {
   const scales = await getScales();
   const tuningPresets = await getTuningPresets();
+  const genres = await getGenres();
+  const genreSelect = document.getElementById('genre');
   const scaleTypeSelect = document.getElementById('scaleType');
   const instrumentSelect = document.getElementById('instrument');
-  const tuningPresetSelect = document.getElementById('tuningPreset');
 
-  // Populate scale types
-  for (const [key, value] of Object.entries(scales)) {
+  // Populate genres
+  for (const [key, value] of Object.entries(genres)) {
     const option = document.createElement('option');
     option.value = key;
     option.textContent = value.name;
-    scaleTypeSelect.appendChild(option);
+    genreSelect.appendChild(option);
   }
+
+  // Initially populate all scales
+  populateScalesForGenre('');
 
   // Populate instruments
   for (const [key, value] of Object.entries(tuningPresets)) {
@@ -148,6 +156,37 @@ async function populateSelects() {
     option.value = key;
     option.textContent = key.replace(/\d/g, '') + ' (' + key.replace(/\D/g, '') + '‑String)';
     instrumentSelect.appendChild(option);
+  }
+}
+
+// Populate scales based on selected genre
+async function populateScalesForGenre(selectedGenre) {
+  const scales = await getScales();
+  const genres = await getGenres();
+  const scaleTypeSelect = document.getElementById('scaleType');
+  
+  // Clear current options
+  scaleTypeSelect.innerHTML = '';
+  
+  if (selectedGenre && genres[selectedGenre]) {
+    // Show only scales for this genre
+    const genreScales = genres[selectedGenre].scales;
+    genreScales.forEach(scaleKey => {
+      if (scales[scaleKey]) {
+        const option = document.createElement('option');
+        option.value = scaleKey;
+        option.textContent = scales[scaleKey].name;
+        scaleTypeSelect.appendChild(option);
+      }
+    });
+  } else {
+    // Show all scales
+    for (const [key, value] of Object.entries(scales)) {
+      const option = document.createElement('option');
+      option.value = key;
+      option.textContent = value.name;
+      scaleTypeSelect.appendChild(option);
+    }
   }
 }
 
@@ -183,6 +222,15 @@ async function generateChordsFromForm() {
   // For computation, if tonic contains "b", convert to its sharp equivalent.
   const normalizedTonic = tonicInput.includes("b") ? convertFlatToSharp(tonicInput) : tonicInput;
   const scaleType = document.getElementById('scaleType').value;
+  
+  console.log(`Generating chords for tonic: "${normalizedTonic}", scaleType: "${scaleType}"`);
+  
+  // Check if scaleType is valid
+  if (!scaleType) {
+    console.log('No scale type selected, skipping chord generation');
+    return;
+  }
+  
   const instrument = document.getElementById('instrument').value;
   const tuningPresets = await getTuningPresets();
   let customTuning = null;
@@ -249,12 +297,13 @@ async function generateChordsFromForm() {
   resultsDiv.appendChild(table);
   
   // Generate and display harmonic sequences
-  await displayHarmonicSequences(normalizedTonic, scaleType, extensions, displayTonic, customTuning);
+  const selectedGenre = document.getElementById('genre').value;
+  await displayHarmonicSequences(normalizedTonic, scaleType, extensions, displayTonic, customTuning, selectedGenre);
 }
 
-async function displayHarmonicSequences(tonic, scaleType, extensionsArr, displayTonic, customTuning) {
+async function displayHarmonicSequences(tonic, scaleType, extensionsArr, displayTonic, customTuning, selectedGenre) {
   const harmonicSequencesDiv = document.getElementById('harmonicSequences');
-  const sequences = await generateHarmonicSequences(tonic, scaleType, extensionsArr, displayTonic, customTuning);
+  const sequences = await generateHarmonicSequences(tonic, scaleType, extensionsArr, displayTonic, customTuning, selectedGenre);
   
   // Store globally for fingering navigation
   window.currentSequences = sequences;
@@ -440,11 +489,7 @@ async function playScaleFromForm() {
 tonicSelect.addEventListener("change", async () => await updateScaleNotes());
 scaleTypeSelect.addEventListener("change", async () => await updateScaleNotes());
 
-window.handleInputChange = async function() {
-  if (!isInitialLoad) {
-    await generateChordsFromForm();
-  }
-};
+// Removed handleInputChange - now using direct event listeners
 
 // Call populateSelects on page load
 document.addEventListener('DOMContentLoaded', async () => {
@@ -457,6 +502,35 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (playScaleBtn) {
       playScaleBtn.addEventListener("click", playScaleFromForm);
     }
+    
+    // Add genre selector event listener
+    const genreSelect = document.getElementById("genre");
+    if (genreSelect) {
+      genreSelect.addEventListener("change", async () => {
+        const selectedGenre = genreSelect.value;
+        await populateScalesForGenre(selectedGenre);
+        await generateChordsFromForm();
+        await updateScaleNotes();
+      });
+    }
+    
+    // Add generate chords button event listener
+    const generateChordsBtn = document.getElementById("generateChordsBtn");
+    if (generateChordsBtn) {
+      generateChordsBtn.addEventListener("click", async () => {
+        await generateChordsFromForm();
+      });
+    }
+    
+    // Prevent form submission
+    const scaleForm = document.getElementById("scaleForm");
+    if (scaleForm) {
+      scaleForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        generateChordsFromForm();
+      });
+    }
+    
     isInitialLoad = false;
   } catch (error) {
     console.error('Error initializing application:', error);

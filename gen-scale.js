@@ -1,9 +1,16 @@
-import { getNotes, getScales, getFormulas, getExtensionNames, getHarmonicSequences } from './constants.js';
+import { getNotes, getScales, getFormulas, getExtensionNames, getHarmonicSequences, getGenres } from './constants.js';
 import { computeGuitarFingerings } from './fingering.js';
 
 async function computeScale(tonic, scaleType) {
   const notes = await getNotes();
   const scales = await getScales();
+  
+  // Check if scale exists
+  if (!scales[scaleType]) {
+    console.error(`Scale type '${scaleType}' not found in scales data`);
+    return [tonic]; // Return just the tonic if scale is not found
+  }
+  
   let scale = [tonic];
   let currentIndex = notes.indexOf(tonic);
   for (let interval of scales[scaleType].pattern) {
@@ -56,6 +63,13 @@ function getChordSymbol(root, quality, extensions, useFlat) {
 
 async function generateChords(tonic, scaleType, extensionsArr, instrument, customTuning, displayTonic) {
   const scales = await getScales();
+  
+  // Check if scale exists
+  if (!scales[scaleType]) {
+    console.error(`Scale type '${scaleType}' not found in scales data`);
+    return []; // Return empty array if scale is not found
+  }
+  
   let scale = await computeScale(tonic, scaleType);
   let qualities = scales[scaleType].chordQualities || [];
   let useFlat = displayTonic.includes("b");
@@ -83,11 +97,25 @@ async function generateChords(tonic, scaleType, extensionsArr, instrument, custo
   return results;
 }
 
-async function generateHarmonicSequences(tonic, scaleType, extensionsArr, displayTonic, customTuning) {
+async function generateHarmonicSequences(tonic, scaleType, extensionsArr, displayTonic, customTuning, selectedGenre) {
   const harmonicSequences = await getHarmonicSequences();
+  const genres = await getGenres();
   const scales = await getScales();
-  const sequences = harmonicSequences[scaleType] || [];
   
+  // If a genre is selected, use genre-specific sequences, otherwise fall back to general sequences
+  let sequences = [];
+  if (selectedGenre && genres[selectedGenre] && genres[selectedGenre].sequences[scaleType]) {
+    sequences = genres[selectedGenre].sequences[scaleType];
+  } else if (harmonicSequences[scaleType]) {
+    sequences = harmonicSequences[scaleType];
+  }
+  
+  // Check if scale exists
+  if (!scales[scaleType]) {
+    console.error(`Scale type '${scaleType}' not found in scales data for harmonic sequences`);
+    return []; // Return empty array if scale is not found
+  }
+
   // Generate chords with fingerings for harmonic sequences
   let scale = await computeScale(tonic, scaleType);
   let qualities = scales[scaleType].chordQualities || [];

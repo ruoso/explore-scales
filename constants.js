@@ -51,6 +51,11 @@ export async function getHarmonicSequences() {
   return data.harmonicSequences;
 }
 
+export async function getGenres() {
+  const data = await loadMusicData();
+  return data.genres;
+}
+
 // For immediate compatibility, export the old constants as promises
 // These will be deprecated in favor of the async getters above
 export const notes = getNotes();
@@ -59,3 +64,4 @@ export const scales = getScales();
 export const formulas = getFormulas();
 export const extensionNames = getExtensionNames();
 export const harmonicSequences = getHarmonicSequences();
+export const genres = getGenres();

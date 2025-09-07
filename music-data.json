@@ -36,7 +36,7 @@
       { "name": "Standard", "tuning": "G3, D4, A4, E5" }
     ],
     "cavaquinho": [
-      { "name": "Standard (Brazil)", "tuning": "D4, G4, B4, D5" } // new
+      { "name": "Standard (Brazil)", "tuning": "D4, G4, B4, D5" }
     ]
   },
 
@@ -236,48 +236,6 @@
       "chordQualities": ["major", "minor", "diminished", "minor", "minor", "major", "major"],
       "romanMapping": ["I", "ii", "iii", "IV", "v", "VI", "VII"],
       "functionsMapping": ["Tonic", "Supertonic", "Mediant", "Subdominant", "Dominant", "Submediant", "Leading Tone"]
-    },
-    "chorinhoMajor": {
-      "name": "🎼 Chorinho Major",
-      "pattern": [2, 2, 1, 2, 2, 2, 1],
-      "chordQualities": ["major", "minor", "diminished", "major", "major", "minor", "diminished"],
-      "romanMapping": ["I", "ii", "iii°", "IV", "V", "vi", "vii°"],
-      "functionsMapping": ["Tonic", "Supertonic", "Mediant", "Subdominant", "Dominant", "Submediant", "Leading Tone"]
-    },
-    "chorinhoHarmonic": {
-      "name": "🎼 Chorinho Harmonic Minor",
-      "pattern": [2, 1, 2, 2, 1, 3, 1],
-      "chordQualities": ["minor", "diminished", "augmented", "minor", "major", "major", "diminished"],
-      "romanMapping": ["i", "ii°", "III+", "iv", "V", "VI", "vii°"],
-      "functionsMapping": ["Tonic", "Supertonic", "Mediant", "Subdominant", "Dominant", "Submediant", "Leading Tone"]
-    },
-    "chorinhoMelodic": {
-      "name": "🎼 Chorinho Melodic Minor",
-      "pattern": [2, 1, 2, 2, 2, 2, 1],
-      "chordQualities": ["minor", "minor", "augmented", "major", "major", "diminished", "diminished"],
-      "romanMapping": ["i", "ii", "III+", "IV", "V", "vi°", "vii°"],
-      "functionsMapping": ["Tonic", "Supertonic", "Mediant", "Subdominant", "Dominant", "Submediant", "Leading Tone"]
-    },
-    "chorinhoDiminished": {
-      "name": "🎼 Chorinho Diminished",
-      "pattern": [2, 1, 2, 1, 2, 1, 2, 1],
-      "chordQualities": ["diminished", "diminished", "diminished", "diminished", "diminished", "diminished", "diminished", "diminished"],
-      "romanMapping": ["i°", "ii°", "iii°", "iv°", "v°", "vi°", "vii°", "viii°"],
-      "functionsMapping": ["Tonic", "Supertonic", "Mediant", "Subdominant", "Dominant", "Submediant", "Leading Tone", "Octave"]
-    },
-    "chorinhoGypsy": {
-      "name": "🎼 Chorinho Gypsy",
-      "pattern": [2, 1, 3, 1, 1, 2, 2],
-      "chordQualities": ["minor", "diminished", "augmented", "major", "major", "minor", "minor"],
-      "romanMapping": ["i", "ii°", "III+", "IV", "V", "vi", "vii"],
-      "functionsMapping": ["Tonic", "Supertonic", "Mediant", "Subdominant", "Dominant", "Submediant", "Leading Tone"]
-    },
-    "chorinhoBrazilian": {
-      "name": "🎼 Chorinho Brazilian",
-      "pattern": [2, 1, 3, 1, 2, 1, 2],
-      "chordQualities": ["major", "diminished", "augmented", "minor", "major", "diminished", "major"],
-      "romanMapping": ["I", "ii°", "III+", "iv", "V", "vi°", "VII"],
-      "functionsMapping": ["Tonic", "Supertonic", "Mediant", "Subdominant", "Dominant", "Submediant", "Subtonic"]
     }
   },
 
@@ -318,6 +276,218 @@
     "7m9": [10, 14],
     "°7": 9,
     "+5": 8
+  },
+
+  "genres": {
+    "classical": {
+      "name": "Classical",
+      "description": "Traditional Western classical music",
+      "scales": ["major", "naturalMinor", "harmonicMinor", "melodicMinor", "dorian", "phrygian", "lydian", "mixolydian", "locrian"],
+      "sequences": {
+        "major": [
+          {
+            "name": "Classical Cadence",
+            "functional": ["Subdominant", "Dominant", "Tonic"],
+            "roman": ["IV", "V", "I"],
+            "indices": [3, 4, 0],
+            "examples": [
+              { "title": "Canon in D", "composer": "Johann Pachelbel" },
+              { "title": "Ode to Joy", "composer": "Ludwig van Beethoven" }
+            ]
+          }
+        ],
+        "harmonicMinor": [
+          {
+            "name": "Classical Minor ii-V-i",
+            "functional": ["Supertonic", "Dominant", "Tonic"],
+            "roman": ["ii°", "V", "i"],
+            "indices": [1, 4, 0],
+            "examples": [
+              { "title": "Hungarian Dance No. 5", "composer": "Johannes Brahms" },
+              { "title": "Dies Irae", "composer": "Traditional" }
+            ]
+          }
+        ]
+      }
+    },
+    "jazz": {
+      "name": "Jazz",
+      "description": "American jazz and swing music",
+      "scales": ["major", "naturalMinor", "harmonicMinor", "melodicMinor", "dorian", "mixolydian", "blues", "bebopMajor", "bebopDominant", "bebopMinor"],
+      "sequences": {
+        "major": [
+          {
+            "name": "Jazz ii-V-I",
+            "functional": ["Supertonic", "Dominant", "Tonic"],
+            "roman": ["ii", "V", "I"],
+            "indices": [1, 4, 0],
+            "examples": [
+              { "title": "Autumn Leaves", "composer": "Johnny Mercer" },
+              { "title": "All The Things You Are", "composer": "Jerome Kern" }
+            ]
+          }
+        ],
+        "dorian": [
+          {
+            "name": "Modal Jazz i-IV",
+            "functional": ["Tonic", "Subdominant"],
+            "roman": ["i", "IV"],
+            "indices": [0, 3],
+            "examples": [
+              { "title": "So What", "composer": "Miles Davis" },
+              { "title": "Impressions", "composer": "John Coltrane" }
+            ]
+          }
+        ],
+        "blues": [
+          {
+            "name": "12-Bar Blues",
+            "functional": ["Tonic", "Subdominant", "Tonic", "Dominant"],
+            "roman": ["I", "IV", "I", "V"],
+            "indices": [0, 2, 0, 4],
+            "examples": [
+              { "title": "Sweet Home Chicago", "composer": "Robert Johnson" },
+              { "title": "The Thrill Is Gone", "composer": "B.B. King" }
+            ]
+          }
+        ]
+      }
+    },
+    "pop": {
+      "name": "Popular Music",
+      "description": "Contemporary pop, rock, and folk music",
+      "scales": ["major", "naturalMinor", "dorian", "mixolydian", "majorPentatonic", "minorPentatonic"],
+      "sequences": {
+        "major": [
+          {
+            "name": "Pop I-V-vi-IV",
+            "functional": ["Tonic", "Dominant", "Submediant", "Subdominant"],
+            "roman": ["I", "V", "vi", "IV"],
+            "indices": [0, 4, 5, 3],
+            "examples": [
+              { "title": "Let It Be", "composer": "The Beatles" },
+              { "title": "Don't Stop Believin'", "composer": "Journey" }
+            ]
+          },
+          {
+            "name": "Doo-Wop Changes",
+            "functional": ["Tonic", "Submediant", "Supertonic", "Dominant"],
+            "roman": ["I", "vi", "ii", "V"],
+            "indices": [0, 5, 1, 4],
+            "examples": [
+              { "title": "Stand By Me", "composer": "Ben E. King" },
+              { "title": "Blue Moon", "composer": "Richard Rodgers" }
+            ]
+          }
+        ],
+        "naturalMinor": [
+          {
+            "name": "Pop Minor Progression",
+            "functional": ["Tonic", "Subtonic", "Submediant", "Subtonic"],
+            "roman": ["i", "VII", "VI", "VII"],
+            "indices": [0, 6, 5, 6],
+            "examples": [
+              { "title": "Stairway to Heaven", "composer": "Led Zeppelin" },
+              { "title": "House of the Rising Sun", "composer": "Traditional" }
+            ]
+          }
+        ]
+      }
+    },
+    "chorinho": {
+      "name": "Chorinho",
+      "description": "Brazilian instrumental music genre",
+      "scales": ["major", "harmonicMinor", "melodicMinor", "diminishedWholeHalf", "hungarianMinor", "spanishPhrygian"],
+      "sequences": {
+        "major": [
+          {
+            "name": "Chorinho Turnaround",
+            "functional": ["Tonic", "Submediant", "Supertonic", "Dominant"],
+            "roman": ["I", "vi", "ii", "V"],
+            "indices": [0, 5, 1, 4],
+            "examples": [
+              { "title": "Tico Tico no Fubá", "composer": "Zequinha de Abreu" },
+              { "title": "Brasileirinho", "composer": "Waldir Azevedo" }
+            ]
+          },
+          {
+            "name": "Chorinho Circle",
+            "functional": ["Mediant", "Submediant", "Supertonic", "Dominant"],
+            "roman": ["iii", "vi", "ii", "V"],
+            "indices": [2, 5, 1, 4],
+            "examples": [
+              { "title": "Choro da Saudade", "composer": "Agustín Barrios" },
+              { "title": "Lamentos", "composer": "Pixinguinha" }
+            ]
+          }
+        ],
+        "harmonicMinor": [
+          {
+            "name": "Chorinho Minor ii-V-i",
+            "functional": ["Supertonic", "Dominant", "Tonic"],
+            "roman": ["ii°", "V", "i"],
+            "indices": [1, 4, 0],
+            "examples": [
+              { "title": "Apanhei-te Cavaquinho", "composer": "Ernesto Nazareth" },
+              { "title": "Brejeiro", "composer": "Ernesto Nazareth" }
+            ]
+          },
+          {
+            "name": "Chorinho Augmented",
+            "functional": ["Tonic", "Mediant", "Dominant"],
+            "roman": ["i", "III+", "V"],
+            "indices": [0, 2, 4],
+            "examples": [
+              { "title": "Odeon", "composer": "Ernesto Nazareth" },
+              { "title": "Corta-Jaca", "composer": "Chiquinha Gonzaga" }
+            ]
+          }
+        ],
+        "diminishedWholeHalf": [
+          {
+            "name": "Diminished Cycle",
+            "functional": ["Tonic", "Mediant", "Dominant", "Submediant"],
+            "roman": ["i°", "III°", "V°", "VI°"],
+            "indices": [0, 2, 4, 5],
+            "examples": [
+              { "title": "Diminished Expectations", "composer": "Traditional" },
+              { "title": "Symmetric Studies", "composer": "Modern Jazz" }
+            ]
+          }
+        ]
+      }
+    },
+    "folk": {
+      "name": "Folk",
+      "description": "Traditional folk music from various cultures",
+      "scales": ["major", "naturalMinor", "dorian", "mixolydian", "phrygian", "majorPentatonic", "minorPentatonic"],
+      "sequences": {
+        "dorian": [
+          {
+            "name": "Celtic Modal",
+            "functional": ["Tonic", "Subtonic", "Tonic", "Subtonic"],
+            "roman": ["i", "VII", "i", "VII"],
+            "indices": [0, 6, 0, 6],
+            "examples": [
+              { "title": "Scarborough Fair", "composer": "Traditional" },
+              { "title": "What Shall We Do with a Drunken Sailor", "composer": "Traditional" }
+            ]
+          }
+        ],
+        "mixolydian": [
+          {
+            "name": "Folk I-VII",
+            "functional": ["Tonic", "Subtonic"],
+            "roman": ["I", "VII"],
+            "indices": [0, 6],
+            "examples": [
+              { "title": "Norwegian Wood", "composer": "The Beatles" },
+              { "title": "Fire on the Mountain", "composer": "Grateful Dead" }
+            ]
+          }
+        ]
+      }
+    }
   },
 
   "harmonicSequences": {
@@ -470,62 +640,6 @@
         "examples": [
           { "title": "Sweet Home Chicago", "composer": "Robert Johnson" },
           { "title": "The Thrill Is Gone", "composer": "B.B. King" }
-        ]
-      }
-    ],
-    "chorinhoMajor": [
-      {
-        "name": "🎼 Chorinho Turnaround",
-        "functional": ["Tonic", "Submediant", "Supertonic", "Dominant"],
-        "roman": ["I", "vi", "ii", "V"],
-        "indices": [0, 5, 1, 4],
-        "examples": [
-          { "title": "Tico Tico no Fubá", "composer": "Zequinha de Abreu" },
-          { "title": "Brasileirinho", "composer": "Waldir Azevedo" }
-        ]
-      },
-      {
-        "name": "🎼 Chorinho Circle",
-        "functional": ["Mediant", "Submediant", "Supertonic", "Dominant"],
-        "roman": ["iii°", "vi", "ii", "V"],
-        "indices": [2, 5, 1, 4],
-        "examples": [
-          { "title": "Choro da Saudade", "composer": "Agustín Barrios" },
-          { "title": "Lamentos", "composer": "Pixinguinha" }
-        ]
-      }
-    ],
-    "chorinhoHarmonic": [
-      {
-        "name": "🎼 Chorinho Minor ii-V-i",
-        "functional": ["Supertonic", "Dominant", "Tonic"],
-        "roman": ["ii°", "V", "i"],
-        "indices": [1, 4, 0],
-        "examples": [
-          { "title": "Apanhei-te Cavaquinho", "composer": "Ernesto Nazareth" },
-          { "title": "Brejeiro", "composer": "Ernesto Nazareth" }
-        ]
-      },
-      {
-        "name": "🎼 Chorinho Augmented",
-        "functional": ["Tonic", "Mediant", "Dominant"],
-        "roman": ["i", "III+", "V"],
-        "indices": [0, 2, 4],
-        "examples": [
-          { "title": "Odeon", "composer": "Ernesto Nazareth" },
-          { "title": "Corta-Jaca", "composer": "Chiquinha Gonzaga" }
-        ]
-      }
-    ],
-    "chorinhoDiminished": [
-      {
-        "name": "🎼 Diminished Cycle",
-        "functional": ["Tonic", "Mediant", "Dominant", "Submediant"],
-        "roman": ["i°", "iii°", "v°", "vi°"],
-        "indices": [0, 2, 4, 5],
-        "examples": [
-          { "title": "Diminished Expectations", "composer": "Traditional" },
-          { "title": "Symmetric Studies", "composer": "Modern Jazz" }
         ]
       }
     ]
