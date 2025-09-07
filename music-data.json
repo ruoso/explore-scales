@@ -86,9 +86,9 @@
     "blues": {
       "name": "Blues",
       "pattern": [3, 2, 1, 1, 3, 2],
-      "chordQualities": ["minor", "major", "major", "minor", "diminished", "minor"],
-      "romanMapping": ["i", "III", "IV", "IV+", "V", "VII"],
-      "functionsMapping": ["Tonic", "Mediant", "Subdominant", "Augmented Fourth", "Dominant", "Subtonic"]
+      "chordQualities": ["minor", "minor", "major", "major", "major", "minor"],
+      "romanMapping": ["i", "♭III", "IV", "♭V", "V", "♭VII"],
+      "functionsMapping": ["Tonic", "Flat Third", "Subdominant", "Flat Fifth", "Dominant", "Flat Seventh"]
     },
     "dorian": {
       "name": "Dorian",
@@ -129,8 +129,8 @@
       "name": "Whole Tone",
       "pattern": [2, 2, 2, 2, 2, 2],
       "chordQualities": ["augmented", "augmented", "augmented", "augmented", "augmented", "augmented"],
-      "romanMapping": ["I+", "II+", "III+", "V", "VI", "VII"],
-      "functionsMapping": ["Tonic", "Supertonic", "Mediant", "Subdominant", "Dominant", "Submediant", "Leading Tone"]
+      "romanMapping": ["I+", "II+", "III+", "IV+", "V+", "VI+"],
+      "functionsMapping": ["Tonic", "Supertonic", "Mediant", "Tritone", "Dominant", "Submediant"]
     },
     "diminishedHalfWhole": {
       "name": "Diminished (Half-Whole)",
@@ -211,7 +211,7 @@
     },
     "bebopMajor": {
       "name": "Bebop Major",
-      "pattern": [2, 2, 1, 2, 1, 2, 2, 1],
+      "pattern": [2, 2, 1, 2, 1, 1, 2, 1],
       "chordQualities": ["major", "major", "minor", "minor", "major", "major", "minor", "diminished"],
       "romanMapping": ["I", "II", "iii", "IV", "V", "VI", "vii", "VII"],
       "functionsMapping": ["Tonic", "Supertonic", "Mediant", "Subdominant", "Dominant", "Submediant", "Leading Tone"]
@@ -452,6 +452,264 @@
             "examples": [
               { "title": "Diminished Expectations", "composer": "Traditional" },
               { "title": "Symmetric Studies", "composer": "Modern Jazz" }
+            ]
+          }
+        ]
+      }
+    },
+    "blues": {
+      "name": "Blues",
+      "description": "African-American blues tradition and its derivatives",
+      "scales": ["blues", "minorPentatonic", "majorPentatonic", "mixolydian", "dorian"],
+      "sequences": {
+        "blues": [
+          {
+            "name": "12-Bar Blues",
+            "functional": ["Tonic", "Subdominant", "Tonic", "Dominant"],
+            "roman": ["I7", "IV7", "I7", "V7"],
+            "indices": [0, 2, 0, 4],
+            "examples": [
+              { "title": "Sweet Home Chicago", "composer": "Robert Johnson" },
+              { "title": "Cross Road Blues", "composer": "Robert Johnson" },
+              { "title": "Hoochie Coochie Man", "composer": "Muddy Waters" }
+            ]
+          },
+          {
+            "name": "Quick Change Blues",
+            "functional": ["Tonic", "Subdominant", "Tonic", "Subdominant"],
+            "roman": ["I7", "IV7", "I7", "IV7"],
+            "indices": [0, 2, 0, 2],
+            "examples": [
+              { "title": "Key to the Highway", "composer": "Big Joe Williams" },
+              { "title": "Dust My Broom", "composer": "Elmore James" }
+            ]
+          }
+        ],
+        "minorPentatonic": [
+          {
+            "name": "Blues Minor i-iv-V",
+            "functional": ["Tonic", "Subdominant", "Dominant"],
+            "roman": ["i7", "iv7", "V7"],
+            "indices": [0, 3, 4],
+            "examples": [
+              { "title": "The Thrill Is Gone", "composer": "B.B. King" },
+              { "title": "Red House", "composer": "Jimi Hendrix" }
+            ]
+          }
+        ],
+        "mixolydian": [
+          {
+            "name": "Dominant Blues",
+            "functional": ["Tonic", "Subtonic", "Subdominant", "Tonic"],
+            "roman": ["I7", "VII7", "IV7", "I7"],
+            "indices": [0, 6, 3, 0],
+            "examples": [
+              { "title": "Mannish Boy", "composer": "Muddy Waters" },
+              { "title": "Born Under a Bad Sign", "composer": "Albert King" }
+            ]
+          }
+        ]
+      }
+    },
+    "bossaNova": {
+      "name": "Bossa Nova",
+      "description": "Brazilian jazz-influenced genre with sophisticated harmony",
+      "scales": ["major", "dorian", "mixolydian", "harmonicMinor", "melodicMinor"],
+      "sequences": {
+        "major": [
+          {
+            "name": "Bossa Nova ii-V-I",
+            "functional": ["Supertonic", "Dominant", "Tonic"],
+            "roman": ["ii7", "V7", "Imaj7"],
+            "indices": [1, 4, 0],
+            "examples": [
+              { "title": "The Girl from Ipanema", "composer": "Antonio Carlos Jobim" },
+              { "title": "Corcovado (Quiet Nights)", "composer": "Antonio Carlos Jobim" },
+              { "title": "Wave", "composer": "Antonio Carlos Jobim" }
+            ]
+          },
+          {
+            "name": "Bossa Turnaround",
+            "functional": ["Tonic", "Submediant", "Supertonic", "Dominant"],
+            "roman": ["Imaj7", "vi7", "ii7", "V7"],
+            "indices": [0, 5, 1, 4],
+            "examples": [
+              { "title": "Desafinado", "composer": "Antonio Carlos Jobim" },
+              { "title": "How Insensitive", "composer": "Antonio Carlos Jobim" }
+            ]
+          }
+        ],
+        "dorian": [
+          {
+            "name": "Bossa Modal",
+            "functional": ["Tonic", "Subdominant", "Subtonic"],
+            "roman": ["i7", "IV7", "VII7"],
+            "indices": [0, 3, 6],
+            "examples": [
+              { "title": "So Danco Samba", "composer": "Antonio Carlos Jobim" },
+              { "title": "Meditation", "composer": "Antonio Carlos Jobim" }
+            ]
+          }
+        ]
+      }
+    },
+    "country": {
+      "name": "Country/Western",
+      "description": "American country and western music traditions",
+      "scales": ["major", "majorPentatonic", "mixolydian", "naturalMinor", "blues"],
+      "sequences": {
+        "major": [
+          {
+            "name": "Country I-IV-V",
+            "functional": ["Tonic", "Subdominant", "Dominant"],
+            "roman": ["I", "IV", "V"],
+            "indices": [0, 3, 4],
+            "examples": [
+              { "title": "Your Cheatin' Heart", "composer": "Hank Williams" },
+              { "title": "Ring of Fire", "composer": "Johnny Cash" },
+              { "title": "Jolene", "composer": "Dolly Parton" }
+            ]
+          },
+          {
+            "name": "Country Circle",
+            "functional": ["Tonic", "Submediant", "Subdominant", "Dominant"],
+            "roman": ["I", "vi", "IV", "V"],
+            "indices": [0, 5, 3, 4],
+            "examples": [
+              { "title": "He Stopped Loving Her Today", "composer": "George Jones" },
+              { "title": "Blue Eyes Crying in the Rain", "composer": "Willie Nelson" }
+            ]
+          }
+        ],
+        "mixolydian": [
+          {
+            "name": "Country Rock I-VII-IV",
+            "functional": ["Tonic", "Subtonic", "Subdominant"],
+            "roman": ["I", "VII", "IV"],
+            "indices": [0, 6, 3],
+            "examples": [
+              { "title": "Sweet Caroline", "composer": "Neil Diamond" },
+              { "title": "Old Time Rock and Roll", "composer": "Bob Seger" }
+            ]
+          }
+        ],
+        "majorPentatonic": [
+          {
+            "name": "Country Pentatonic",
+            "functional": ["Tonic", "Supertonic", "Dominant"],
+            "roman": ["I", "II", "V"],
+            "indices": [0, 1, 3],
+            "examples": [
+              { "title": "Friends in Low Places", "composer": "Garth Brooks" },
+              { "title": "Mammas Don't Let Your Babies Grow Up to Be Cowboys", "composer": "Waylon Jennings" }
+            ]
+          }
+        ]
+      }
+    },
+    "reggae": {
+      "name": "Reggae",
+      "description": "Jamaican reggae and related Caribbean styles",
+      "scales": ["major", "naturalMinor", "dorian", "mixolydian", "minorPentatonic"],
+      "sequences": {
+        "major": [
+          {
+            "name": "Reggae I-V-vi-IV",
+            "functional": ["Tonic", "Dominant", "Submediant", "Subdominant"],
+            "roman": ["I", "V", "vi", "IV"],
+            "indices": [0, 4, 5, 3],
+            "examples": [
+              { "title": "No Woman No Cry", "composer": "Bob Marley" },
+              { "title": "Three Little Birds", "composer": "Bob Marley" },
+              { "title": "Is This Love", "composer": "Bob Marley" }
+            ]
+          },
+          {
+            "name": "One Drop",
+            "functional": ["Tonic", "Subdominant", "Submediant", "Dominant"],
+            "roman": ["I", "IV", "vi", "V"],
+            "indices": [0, 3, 5, 4],
+            "examples": [
+              { "title": "One Love", "composer": "Bob Marley" },
+              { "title": "Buffalo Soldier", "composer": "Bob Marley" }
+            ]
+          }
+        ],
+        "naturalMinor": [
+          {
+            "name": "Minor Reggae",
+            "functional": ["Tonic", "Subtonic", "Submediant", "Subtonic"],
+            "roman": ["i", "VII", "VI", "VII"],
+            "indices": [0, 6, 5, 6],
+            "examples": [
+              { "title": "Could You Be Loved", "composer": "Bob Marley" },
+              { "title": "Redemption Song", "composer": "Bob Marley" }
+            ]
+          }
+        ],
+        "dorian": [
+          {
+            "name": "Roots Rock Reggae",
+            "functional": ["Tonic", "Subtonic", "Subdominant"],
+            "roman": ["i", "VII", "IV"],
+            "indices": [0, 6, 3],
+            "examples": [
+              { "title": "Get Up, Stand Up", "composer": "Bob Marley" },
+              { "title": "I Shot the Sheriff", "composer": "Bob Marley" }
+            ]
+          }
+        ]
+      }
+    },
+    "flamenco": {
+      "name": "Flamenco",
+      "description": "Spanish flamenco tradition with Moorish and Andalusian influences",
+      "scales": ["phrygian", "spanishPhrygian", "harmonicMinor", "naturalMinor", "hungarianMinor"],
+      "sequences": {
+        "phrygian": [
+          {
+            "name": "Flamenco Cadence",
+            "functional": ["Subtonic", "Submediant", "Dominant", "Tonic"],
+            "roman": ["VII", "VI", "V", "i"],
+            "indices": [6, 5, 4, 0],
+            "examples": [
+              { "title": "Malagueña", "composer": "Traditional" },
+              { "title": "Entre dos Aguas", "composer": "Paco de Lucía" },
+              { "title": "Asturias", "composer": "Isaac Albéniz" }
+            ]
+          },
+          {
+            "name": "Phrygian ii-I",
+            "functional": ["Supertonic", "Tonic"],
+            "roman": ["II", "i"],
+            "indices": [1, 0],
+            "examples": [
+              { "title": "Recuerdos de la Alhambra", "composer": "Francisco Tárrega" },
+              { "title": "Spanish Romance", "composer": "Traditional" }
+            ]
+          }
+        ],
+        "spanishPhrygian": [
+          {
+            "name": "Spanish Gypsy Scale",
+            "functional": ["Tonic", "Supertonic", "Mediant", "Subdominant"],
+            "roman": ["I", "II", "III+", "iv"],
+            "indices": [0, 1, 2, 3],
+            "examples": [
+              { "title": "Gipsy Kings - Bamboléo", "composer": "Gipsy Kings" },
+              { "title": "Rumba Flamenca", "composer": "Traditional" }
+            ]
+          }
+        ],
+        "harmonicMinor": [
+          {
+            "name": "Andalusian Cadence",
+            "functional": ["Tonic", "Submediant", "Dominant", "Tonic"],
+            "roman": ["i", "VI", "V", "i"],
+            "indices": [0, 5, 4, 0],
+            "examples": [
+              { "title": "Capricho Árabe", "composer": "Francisco Tárrega" },
+              { "title": "Sevillanas", "composer": "Traditional" }
             ]
           }
         ]
