@@ -118,7 +118,8 @@ function generateHarmonicSequences(tonic, scaleType, extensionsArr, displayTonic
 
     return {
       name: sequence.name,
-      chords: sequenceChords
+      chords: sequenceChords,
+      examples: sequence.examples
     };
   });
 }

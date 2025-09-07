@@ -296,8 +296,28 @@ function displayHarmonicSequences(tonic, scaleType, extensionsArr, displayTonic)
       html += `<td class="chord-notes">${chord.chordNotes.join(', ')}</td>`;
     });
     
-    html += `</tr>
-        </table>
+    html += `</tr>`;
+    
+    // Add examples if they exist
+    if (sequence.examples && sequence.examples.length > 0) {
+      html += `<tr class="sequence-header">
+            <td><strong>Examples</strong></td>
+            <td class="examples-cell" colspan="${sequence.chords.length}">`;
+      
+      sequence.examples.forEach((example, index) => {
+        html += `<div class="example-piece">
+          <span class="example-title">${example.title}</span>
+          <span class="example-composer">by ${example.composer}</span>
+        </div>`;
+        if (index < sequence.examples.length - 1) {
+          html += `<br>`;
+        }
+      });
+      
+      html += `</td></tr>`;
+    }
+    
+    html += `</table>
       </div>
     </div>`;
   });

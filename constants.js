@@ -328,25 +328,41 @@ export const harmonicSequences = {
       name: "Classic Pop Progression",
       functional: ["Tonic", "Dominant", "Submediant", "Subdominant"],
       roman: ["I", "V", "vi", "IV"],
-      indices: [0, 4, 5, 3]
+      indices: [0, 4, 5, 3],
+      examples: [
+        { title: "Let It Be", composer: "The Beatles" },
+        { title: "Don't Stop Believin'", composer: "Journey" }
+      ]
     },
     {
       name: "Circle of Fifths",
       functional: ["Supertonic", "Dominant", "Tonic"],
       roman: ["ii", "V", "I"],
-      indices: [1, 4, 0]
+      indices: [1, 4, 0],
+      examples: [
+        { title: "Autumn Leaves", composer: "Johnny Mercer" },
+        { title: "All The Things You Are", composer: "Jerome Kern" }
+      ]
     },
     {
       name: "Doo-Wop Changes",
       functional: ["Tonic", "Submediant", "Supertonic", "Dominant"],
       roman: ["I", "vi", "ii", "V"],
-      indices: [0, 5, 1, 4]
+      indices: [0, 5, 1, 4],
+      examples: [
+        { title: "Stand By Me", composer: "Ben E. King" },
+        { title: "Blue Moon", composer: "Richard Rodgers" }
+      ]
     },
     {
       name: "Plagal Cadence",
       functional: ["Subdominant", "Tonic"],
       roman: ["IV", "I"],
-      indices: [3, 0]
+      indices: [3, 0],
+      examples: [
+        { title: "Amazing Grace", composer: "Traditional" },
+        { title: "Hey Jude", composer: "The Beatles" }
+      ]
     }
   ],
   naturalMinor: [
@@ -354,19 +370,31 @@ export const harmonicSequences = {
       name: "Natural Minor Progression",
       functional: ["Tonic", "Subdominant", "Subtonic", "Mediant"],
       roman: ["i", "iv", "VII", "III"],
-      indices: [0, 3, 6, 2]
+      indices: [0, 3, 6, 2],
+      examples: [
+        { title: "Stairway to Heaven", composer: "Led Zeppelin" },
+        { title: "House of the Rising Sun", composer: "Traditional" }
+      ]
     },
     {
       name: "Minor ii-V-i",
       functional: ["Supertonic", "Dominant", "Tonic"],
       roman: ["ii°", "V", "i"],
-      indices: [1, 4, 0]
+      indices: [1, 4, 0],
+      examples: [
+        { title: "Autumn Leaves", composer: "Johnny Mercer" },
+        { title: "Summertime", composer: "George Gershwin" }
+      ]
     },
     {
       name: "Andalusian Cadence",
       functional: ["Tonic", "Submediant", "Subtonic", "Mediant"],
       roman: ["i", "VI", "VII", "III"],
-      indices: [0, 5, 6, 2]
+      indices: [0, 5, 6, 2],
+      examples: [
+        { title: "Hit the Road Jack", composer: "Ray Charles" },
+        { title: "Sultans of Swing", composer: "Dire Straits" }
+      ]
     }
   ],
   harmonicMinor: [
@@ -374,13 +402,21 @@ export const harmonicSequences = {
       name: "Harmonic Minor ii-V-i",
       functional: ["Supertonic", "Dominant", "Tonic"],
       roman: ["ii°", "V", "i"],
-      indices: [1, 4, 0]
+      indices: [1, 4, 0],
+      examples: [
+        { title: "Malaguena", composer: "Ernesto Lecuona" },
+        { title: "Hungarian Dance No. 5", composer: "Johannes Brahms" }
+      ]
     },
     {
       name: "Phrygian Dominant",
       functional: ["Dominant", "Tonic"],
       roman: ["V", "i"],
-      indices: [4, 0]
+      indices: [4, 0],
+      examples: [
+        { title: "Hava Nagila", composer: "Traditional" },
+        { title: "Misirlou", composer: "Traditional" }
+      ]
     }
   ],
   melodicMinor: [
@@ -388,7 +424,11 @@ export const harmonicSequences = {
       name: "Melodic Minor ii-V-i",
       functional: ["Supertonic", "Dominant", "Tonic"],
       roman: ["ii", "V", "i"],
-      indices: [1, 4, 0]
+      indices: [1, 4, 0],
+      examples: [
+        { title: "So What", composer: "Miles Davis" },
+        { title: "Impressions", composer: "John Coltrane" }
+      ]
     }
   ],
   dorian: [
@@ -396,13 +436,21 @@ export const harmonicSequences = {
       name: "Dorian i-IV",
       functional: ["Tonic", "Subdominant"],
       roman: ["i", "IV"],
-      indices: [0, 3]
+      indices: [0, 3],
+      examples: [
+        { title: "So What", composer: "Miles Davis" },
+        { title: "Scarborough Fair", composer: "Traditional" }
+      ]
     },
     {
       name: "Dorian ii-v-i",
       functional: ["Supertonic", "Dominant", "Tonic"],
       roman: ["ii", "v", "i"],
-      indices: [1, 4, 0]
+      indices: [1, 4, 0],
+      examples: [
+        { title: "Eleanor Rigby", composer: "The Beatles" },
+        { title: "Mad World", composer: "Gary Jules" }
+      ]
     }
   ],
   mixolydian: [
@@ -410,13 +458,21 @@ export const harmonicSequences = {
       name: "Mixolydian I-VII",
       functional: ["Tonic", "Subtonic"],
       roman: ["I", "VII"],
-      indices: [0, 6]
+      indices: [0, 6],
+      examples: [
+        { title: "Sweet Child O' Mine", composer: "Guns N' Roses" },
+        { title: "Norwegian Wood", composer: "The Beatles" }
+      ]
     },
     {
       name: "Blues Dominant",
       functional: ["Tonic", "Subdominant", "Tonic", "Subtonic"],
       roman: ["I", "IV", "I", "VII"],
-      indices: [0, 3, 0, 6]
+      indices: [0, 3, 0, 6],
+      examples: [
+        { title: "Sweet Home Chicago", composer: "Robert Johnson" },
+        { title: "The Thrill Is Gone", composer: "B.B. King" }
+      ]
     }
   ],
   // Chorinho sequences
@@ -425,13 +481,21 @@ export const harmonicSequences = {
       name: "🎼 Chorinho Turnaround",
       functional: ["Tonic", "Submediant", "Supertonic", "Dominant"],
       roman: ["I", "vi", "ii", "V"],
-      indices: [0, 5, 1, 4]
+      indices: [0, 5, 1, 4],
+      examples: [
+        { title: "Tico Tico no Fubá", composer: "Zequinha de Abreu" },
+        { title: "Brasileirinho", composer: "Waldir Azevedo" }
+      ]
     },
     {
       name: "🎼 Chorinho Circle",
       functional: ["Mediant", "Submediant", "Supertonic", "Dominant"],
       roman: ["iii°", "vi", "ii", "V"],
-      indices: [2, 5, 1, 4]
+      indices: [2, 5, 1, 4],
+      examples: [
+        { title: "Choro da Saudade", composer: "Agustín Barrios" },
+        { title: "Lamentos", composer: "Pixinguinha" }
+      ]
     }
   ],
   chorinhoHarmonic: [
@@ -439,13 +503,21 @@ export const harmonicSequences = {
       name: "🎼 Chorinho Minor ii-V-i",
       functional: ["Supertonic", "Dominant", "Tonic"],
       roman: ["ii°", "V", "i"],
-      indices: [1, 4, 0]
+      indices: [1, 4, 0],
+      examples: [
+        { title: "Apanhei-te Cavaquinho", composer: "Ernesto Nazareth" },
+        { title: "Brejeiro", composer: "Ernesto Nazareth" }
+      ]
     },
     {
       name: "🎼 Chorinho Augmented",
       functional: ["Tonic", "Mediant", "Dominant"],
       roman: ["i", "III+", "V"],
-      indices: [0, 2, 4]
+      indices: [0, 2, 4],
+      examples: [
+        { title: "Odeon", composer: "Ernesto Nazareth" },
+        { title: "Corta-Jaca", composer: "Chiquinha Gonzaga" }
+      ]
     }
   ],
   chorinhoDiminished: [
@@ -453,7 +525,11 @@ export const harmonicSequences = {
       name: "🎼 Diminished Cycle",
       functional: ["Tonic", "Mediant", "Dominant", "Submediant"],
       roman: ["i°", "iii°", "v°", "vi°"],
-      indices: [0, 2, 4, 5]
+      indices: [0, 2, 4, 5],
+      examples: [
+        { title: "Diminished Expectations", composer: "Traditional" },
+        { title: "Symmetric Studies", composer: "Modern Jazz" }
+      ]
     }
   ]
 };
