@@ -2,86 +2,146 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Harmonic Scale Explorer - Extended String Instruments with Query Parameters and Flat Support</title>
+  <title>Mode Explorer</title>
   <link rel="stylesheet" href="styles.css">
   <script src="main.js" type="module"></script>
 </head>
 <body>
-  <div class="container">
-    <h1>Harmonic Scale Explorer</h1>
-    <form id="scaleForm" action="." method="get">
-      <div class="form-group">
-        <label for="tonic">Tonic Chord</label>
-        <!-- Change input to select -->
-        <select id="tonic" name="tonic" required>
-          <option value="C">C</option>
-          <option value="C#">C#</option>
-          <option value="Db">Db</option>
-          <option value="D">D</option>
-          <option value="D#">D#</option>
-          <option value="Eb">Eb</option>
-          <option value="E">E</option>
-          <option value="F">F</option>
-          <option value="F#">F#</option>
-          <option value="Gb">Gb</option>
-          <option value="G">G</option>
-          <option value="G#">G#</option>
-          <option value="Ab">Ab</option>
-          <option value="A">A</option>
-          <option value="A#">A#</option>
-          <option value="Bb">Bb</option>
-          <option value="B">B</option>
-        </select>
+  <div class="app-shell">
+    <header class="app-header">
+      <span class="app-kicker">Explore tonal colours</span>
+      <h1>Mode Explorer</h1>
+      <p class="app-subtitle">Choose a mode, hear its colour, and build a harmonic palette tailored to your instrument.</p>
+    </header>
+    <div class="app-main">
+      <form id="scaleForm" class="control-panel" action="." method="get">
+        <section class="panel-section">
+          <h2 class="panel-title">Key centre</h2>
+          <label class="field-label" for="tonic">Tonic</label>
+          <select id="tonic" name="tonic" required>
+            <option value="C">C</option>
+            <option value="C#">C#</option>
+            <option value="Db">Db</option>
+            <option value="D">D</option>
+            <option value="D#">D#</option>
+            <option value="Eb">Eb</option>
+            <option value="E">E</option>
+            <option value="F">F</option>
+            <option value="F#">F#</option>
+            <option value="Gb">Gb</option>
+            <option value="G">G</option>
+            <option value="G#">G#</option>
+            <option value="Ab">Ab</option>
+            <option value="A">A</option>
+            <option value="A#">A#</option>
+            <option value="Bb">Bb</option>
+            <option value="B">B</option>
+          </select>
+        </section>
+        <section class="panel-section">
+          <h2 class="panel-title">Style focus</h2>
+          <label class="field-label" for="genre">Genre (optional)</label>
+          <select id="genre" name="genre">
+            <option value="">All styles</option>
+          </select>
+        </section>
+        <section class="panel-section">
+          <h2 class="panel-title">Instrument &amp; tuning</h2>
+          <label class="field-label" for="instrument">Instrument</label>
+          <select id="instrument" name="instrument" required></select>
+          <label class="field-label" for="tuningPreset">Tuning preset</label>
+          <select id="tuningPreset" name="tuningPreset"></select>
+          <label class="field-label" for="customTuning">Custom tuning (optional)</label>
+          <input type="text" id="customTuning" name="customTuning" placeholder="E2, A2, D3, G3, B3, E4">
+        </section>
+        <input type="hidden" id="scaleType" name="scaleType">
+      </form>
+      <section class="mode-browser" aria-label="Browse modes">
+        <div class="mode-browser-header">
+          <div>
+            <h2>Choose a mode</h2>
+            <p>Every card highlights a specific mode. Tap to focus on its unique colour and harmonic role.</p>
+          </div>
+          <div class="mode-filter">
+            <label for="modeGroupSelect">Mode family</label>
+            <select id="modeGroupSelect" name="modeGroup">
+              <option value="all">All families</option>
+            </select>
+          </div>
+        </div>
+        <div id="modeGrid" class="mode-groups"></div>
+      </section>
+    </div>
+    <section class="mode-details" aria-live="polite">
+      <div class="mode-details-header">
+        <div class="mode-title">
+          <span class="mode-family" id="selectedModeFamily">Pick a mode</span>
+          <h2 id="selectedModeTitle">Nothing selected yet</h2>
+          <p class="mode-subtitle" id="selectedModeSubtitle">Choose a mode to view its intervals, scale degrees, and harmonic starting points.</p>
+        </div>
+        <div class="mode-pattern">
+          <h3>Interval pattern</h3>
+          <p id="selectedModePattern">—</p>
+        </div>
       </div>
-      <div class="form-group">
-        <label for="genre">Genre (Optional)</label>
-        <select id="genre" name="genre">
-          <option value="">All Scales</option>
-        </select>
+      <div class="mode-description">
+        <p id="selectedModeDescription">Use the mode cards to spotlight a sound. We’ll surface its parent scale, signature tones, and staff notation automatically.</p>
+        <dl class="mode-meta">
+          <div>
+            <dt>Parent scale</dt>
+            <dd id="selectedModeParent">—</dd>
+          </div>
+          <div>
+            <dt>Signature tones</dt>
+            <dd id="selectedModeCharacteristic">—</dd>
+          </div>
+        </dl>
       </div>
-      <div class="form-group">
-        <label for="scaleType">Scale Type</label>
-        <select id="scaleType" name="scaleType" required></select>
+      <div class="mode-visuals">
+        <div class="mode-scale">
+          <h3>Scale notes</h3>
+          <div id="scaleNotes" class="scale-notes"></div>
+        </div>
+        <div class="mode-actions">
+          <button type="button" id="playScaleBtn" class="submit-btn">Play mode</button>
+          <button type="button" id="generateChordsBtn" class="submit-btn secondary">Generate chord palette</button>
+        </div>
       </div>
-      <div class="form-group">
-        <label>Extensions</label>
-        <table>
-          <tr>
-            <td><label>i: <input id="extensions-1" name="extensions-1" style="width:4em"></input></label></td>
-            <td><label>ii: <input id="extensions-2" name="extensions-2" style="width:4em"></input></label></td>
-            <td><label>iii: <input id="extensions-3" name="extensions-3" style="width:4em"></input></label></td>
-            <td><label>iv: <input id="extensions-4" name="extensions-4" style="width:4em"></input></label></td>
-            <td><label>v: <input id="extensions-5" name="extensions-5" style="width:4em"></input></label></td>
-            <td><label>vi: <input id="extensions-6" name="extensions-6" style="width:4em"></input></label></td>
-            <td><label>vii: <input id="extensions-7" name="extensions-7" style="width:4em"></input></label></td>
-            <td><label>viii: <input id="extensions-8" name="extensions-8" style="width:4em"></input></label></td>
-          </tr>
-        </table>
+      <div class="extensions-panel">
+        <div class="extensions-header">
+          <h3>Custom extensions</h3>
+          <p>Optional tensions for each degree before generating chords.</p>
+        </div>
+        <div class="extensions-grid">
+          <label class="extension-field">i
+            <input id="extensions-1" name="extensions-1" type="text" placeholder="9, 11">
+          </label>
+          <label class="extension-field">ii
+            <input id="extensions-2" name="extensions-2" type="text" placeholder="9, 11">
+          </label>
+          <label class="extension-field">iii
+            <input id="extensions-3" name="extensions-3" type="text" placeholder="9, 11">
+          </label>
+          <label class="extension-field">iv
+            <input id="extensions-4" name="extensions-4" type="text" placeholder="9, 11">
+          </label>
+          <label class="extension-field">v
+            <input id="extensions-5" name="extensions-5" type="text" placeholder="9, 11">
+          </label>
+          <label class="extension-field">vi
+            <input id="extensions-6" name="extensions-6" type="text" placeholder="9, 11">
+          </label>
+          <label class="extension-field">vii
+            <input id="extensions-7" name="extensions-7" type="text" placeholder="9, 11">
+          </label>
+          <label class="extension-field">viii
+            <input id="extensions-8" name="extensions-8" type="text" placeholder="9, 11">
+          </label>
+        </div>
       </div>
-      <!-- New scale notes container -->
-      <div class="form-group" id="scaleNotesGroup">
-        <label>Scale Notes</label>
-        <div id="scaleNotes"></div>
-        <!-- New play scale button -->
-        <button type="button" id="playScaleBtn" class="submit-btn">Play Scale</button>
-      </div>
-      <!-- Removed global chord extensions group -->
-      <div class="form-group">
-        <label for="instrument">Instrument</label>
-        <select id="instrument" name="instrument" required></select>
-      </div>
-      <div class="form-group" id="tuningGroup">
-        <label for="tuningPreset">Tuning Preset:</label>
-        <select id="tuningPreset" name="tuningPreset"></select>
-        <label for="customTuning" style="margin-top: 10px;">Custom Tuning (optional):</label>
-        <input type="text" id="customTuning" name="customTuning" placeholder="e.g., E2, A2, D3, G3, B3, E4">
-      </div>
-      <button type="button" id="generateChordsBtn" class="submit-btn">Generate Chords</button>
-    </form>
-    <div id="results" class="result"></div>
-    
-    <!-- Harmonic Sequences Section -->
-    <div id="harmonicSequences" class="harmonic-sequences"></div>
+    </section>
+    <section id="results" class="result"></section>
+    <section id="harmonicSequences" class="harmonic-sequences"></section>
   </div>
 </body>
 </html>

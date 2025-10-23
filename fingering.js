@@ -5,7 +5,10 @@ import { LRUCache } from './cache-utils.js';
 const fingeringCache = new LRUCache(200);
 const cacheKeyGenerator = (chordNotes, tuning) => {
   const tuningKey = tuning.map(t => `${t.note}${t.octave}`).join('|');
-  const notesKey = chordNotes.sort().join('|');
+  // Clone the chord notes before sorting so we don't mutate the caller's
+  // array.  The original order encodes the chord's fundamental, which the
+  // fingering search relies on to keep the tonic out front.
+  const notesKey = [...chordNotes].sort().join('|');
   return `${notesKey}:${tuningKey}`;
 };
 
